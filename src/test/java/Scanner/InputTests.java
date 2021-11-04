@@ -5,7 +5,7 @@ import java.io.FileNotFoundException;
 
 public class InputTests {
 
-    private static final String TEST_FILE = "C:/GIT/FSU-JavaSST-Compiler/src/test/java/Testfiles/HelloWorld.java";
+    private static final String TEST_FILE = "./src/test/java/Testfiles/HelloWorld.java";
 
     @Test
     public void Run_without_error() {
