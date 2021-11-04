@@ -1,5 +1,7 @@
-import java.io.FileNotFoundException;
+package Scanner;
+
 import org.junit.jupiter.api.Test;
+import java.io.FileNotFoundException;
 
 public class InputTests {
 

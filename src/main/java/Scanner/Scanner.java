@@ -1,6 +1,8 @@
-public class Scanner {
+package Scanner;
 
-    private Input input;
+public class Scanner {
+    /*
+    private Scanner.Input input;
     private char c;
 
     public static final int ident   = 0,
@@ -15,7 +17,7 @@ public class Scanner {
     public String id;
     public String num;
 
-    Scanner(Input in) {
+    Scanner.Scanner(Scanner.Input in) {
         this.input = in;
     }
 
@@ -33,7 +35,7 @@ public class Scanner {
             c = input.next();
             if (c == '*') {
                 char pre = c;
-                while (!(String.valueOf(pre) + String.valueOf(c)).equals("*/")) {
+                while (!(String.valueOf(pre) + String.valueOf(c)).equals("* /")) {
                     pre = c;
                     c = input.next();
                 }
@@ -88,5 +90,5 @@ public class Scanner {
             c = input.next();
         }
     }
-
+    */
 }
