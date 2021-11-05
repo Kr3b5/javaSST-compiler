@@ -22,7 +22,7 @@
 
 ### Built With
 
-* [Java](https://www.java.com/en/)
+* [Java 17](https://www.java.com/en/)
 * [Maven](https://maven.apache.org/)
 
 
