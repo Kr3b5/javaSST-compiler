@@ -136,7 +136,7 @@ public class Scanner {
         }
         // !=
         else if (c == '!' && input.getBuffer() == '=') {
-            sym = SMALLER.id;
+            sym = NEQUAL.id;
             c = input.next();
             c = input.next();
         }else{
