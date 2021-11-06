@@ -162,10 +162,23 @@ public class Scanner {
             sym = NEQUAL.id;
             c = input.next();
             c = input.next();
-        }else{
+        }
+        // {
+        else if (c == '{') {
+            sym = LCBRACKET.id;
+            c = input.next();
+        }
+        // }
+        else if (c == '}') {
+            sym = RCBRACKET.id;
+            c = input.next();
+        }
+        // OTHER
+        else{
             sym = OTHER.id;
             c = input.next();
         }
+
 
     }
 }

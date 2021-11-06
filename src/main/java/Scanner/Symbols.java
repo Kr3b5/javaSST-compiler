@@ -25,6 +25,8 @@ public enum Symbols {
     SMALLER     (16),       // <
     GR_EQ       (17),       // >=
     SM_EQ       (18),       // <=
+    LCBRACKET  (19),       // {
+    RCBRACKET  (20),       // }
     OTHER       (99);
 
 
