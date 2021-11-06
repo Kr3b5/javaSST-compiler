@@ -1,5 +1,9 @@
 package Scanner;
 
+/**
+ * Enum of symbols
+ * @author Kr3b5
+ */
 public enum Symbols {
 
     IDENT       (0),        // ident
@@ -24,6 +28,9 @@ public enum Symbols {
     OTHER       (99);
 
 
+    /**
+     * The ID of the symbols
+     */
     public final int id;
 
     Symbols(int symbol) {

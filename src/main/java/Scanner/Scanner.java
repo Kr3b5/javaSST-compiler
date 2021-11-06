@@ -2,20 +2,41 @@ package Scanner;
 
 import static Scanner.Symbols.*;
 
+/**
+ * Compiler - Scanner
+ * @author Kr3b5
+ */
 public class Scanner {
 
     private Input input;
     private char c;
 
+    /**
+     * Symbol
+     */
     public int sym;
+    /**
+     * Ident
+     */
     public String id;
+    /**
+     * Number
+     */
     public String num;
 
+    /**
+     * Instantiates a new Scanner.
+     *
+     * @param in Input instance
+     */
     Scanner(Input in) {
         this.input = in;
     }
 
 
+    /**
+     * Checks next Symbol
+     */
     public void getSym() {
         //reset num & id;
         num = id = "";
