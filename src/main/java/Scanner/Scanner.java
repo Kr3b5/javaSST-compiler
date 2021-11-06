@@ -1,94 +1,147 @@
 package Scanner;
 
-public class Scanner {
-    /*
-    private Scanner.Input input;
-    private char c;
+import static Scanner.Symbols.*;
 
-    public static final int ident   = 0,
-                            number  = 1,
-                            lparen  = 2,
-                            rparen  = 3,
-                            plus    = 4,
-                            times   = 5,
-                            other   = 6;
+public class Scanner {
+
+    private Input input;
+    private char c;
 
     public int sym;
     public String id;
     public String num;
 
-    Scanner.Scanner(Scanner.Input in) {
+    Scanner(Input in) {
         this.input = in;
     }
 
+
+
     public void getSym() {
+        //reset num & id;
         num = id = "";
 
-        //space
-        while (c <= ' ') {
-            c = input.next();
-        }
 
-        // comment
-        if (c == '/') {
-            sym = other;
-            c = input.next();
-            if (c == '*') {
-                char pre = c;
-                while (!(String.valueOf(pre) + String.valueOf(c)).equals("* /")) {
+        while (input.hasNext()) {
+
+            // ignore space
+            if (c <= ' ') c = input.next();
+
+            // ignore comment
+            if (c == '/' && input.getBuffer() == '*') {
+                c = input.next();  //skip
+                int pre = ' ';
+                while (!(pre == '*' && c == '/')) {
                     pre = c;
                     c = input.next();
                 }
             }
-        }
 
-        //String.valueOf(c).matches("[a-zA-Z]");
-
-        // ident
-        if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) {
-            sym = ident;
-            id = "";
-            do {
-                id += c;
+            // ident
+            if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) {
+                sym = IDENT.id;
+                id = "";
+                do {
+                    id += c;
+                    c = input.next();
+                } while ((c >= 'a' && c <= 'z') ||
+                        (c >= 'A' && c <= 'Z') ||
+                        (c >= '0' && c <= '9'));
+            }
+            // number
+            else if (c >= '0' && c <= '9') {
+                sym = NUMBER.id;
+                num = "";
+                do {
+                    num += c;
+                    c = input.next();
+                } while ((c >= '0' && c <= '9'));
+            }
+            // (
+            else if (c == '(') {
+                sym = LPAREN.id;
                 c = input.next();
-            } while ((c >= 'a' && c <= 'z') ||
-                    (c >= 'A' && c <= 'Z') ||
-                    (c >= '0' && c <= '9'));
-        }
-        // number
-        else if (c >= '0' && c <= '9') {
-            sym = number;
-            num = "";
-            do {
-                num += c;
+            }
+            // )
+            else if (c == ')') {
+                sym = RPAREN.id;
                 c = input.next();
-            } while ((c >= '0' && c <= '9'));
-        }
-        // left bracket
-        else if (c == '(') {
-            sym = lparen;
-            c = input.next();
-        }
-        // right bracket
-        else if (c == ')') {
-            sym = rparen;
-            c = input.next();
-        }
-        // plus
-        else if (c == '+') {
-            sym = plus;
-            c = input.next();
-        }
-        // times
-        else if (c == '*') {
-            sym = times;
-            c = input.next();
-        }
-        // error
-        else {
-            sym = other;
-            c = input.next();
+            }
+            // +
+            else if (c == '+') {
+                sym = PLUS.id;
+                c = input.next();
+            }
+            // -
+            else if (c == '-') {
+                sym = MINUS.id;
+                c = input.next();
+            }
+            // *
+            else if (c == '*') {
+                sym = TIMES.id;
+                c = input.next();
+            }
+            // /
+            else if (c == '/') {
+                sym = SLASH.id;
+                c = input.next();
+            }
+            // [
+            else if (c == '[') {
+                sym = RBRACKET.id;
+                c = input.next();
+            }
+            // ]
+            else if (c == ']') {
+                sym = LBRACKET.id;
+                c = input.next();
+            }
+            // ,
+            else if (c == ',') {
+                sym = COMMA.id;
+                c = input.next();
+            }
+            // ;
+            else if (c == ';') {
+                sym = SEMI.id;
+                c = input.next();
+            }
+            // =
+            else if (c == '=') {
+                sym = ASSIGN.id;
+                // ==
+                if( input.getBuffer() == '='){
+                    sym = EQUAL.id;
+                    c = input.next();
+                }
+                c = input.next();
+            }
+            // >
+            else if (c == '>') {
+                sym = GREATER.id;
+                // >=
+                if( input.getBuffer() == '='){
+                    sym = GR_EQ.id;
+                    c = input.next();
+                }
+                c = input.next();
+            }
+            // <
+            else if (c == '<') {
+                sym = SMALLER.id;
+                // <=
+                if (input.getBuffer() == '=') {
+                    sym = SM_EQ.id;
+                    c = input.next();
+                }
+                c = input.next();
+            }
+            // !=
+            else if (c == '!' && input.getBuffer() == '=') {
+                sym = SMALLER.id;
+                c = input.next(); c = input.next();
+            }
         }
     }
-    */
 }

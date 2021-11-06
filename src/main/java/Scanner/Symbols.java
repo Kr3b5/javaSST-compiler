@@ -24,9 +24,9 @@ public enum Symbols {
     OTHER       (99);
 
 
-    public final int symbol;
+    public final int id;
 
     Symbols(int symbol) {
-        this.symbol = symbol;
+        this.id = symbol;
     }
 }

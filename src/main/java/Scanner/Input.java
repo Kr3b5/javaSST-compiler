@@ -38,4 +38,8 @@ public class Input implements Iterator<Character> {
     public boolean hasNext() {
         return buffer != EOF && buffer != ERROR;
     }
+
+    public Character getBuffer() {
+        return (char) buffer;
+    }
 }
