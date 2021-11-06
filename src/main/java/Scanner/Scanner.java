@@ -21,7 +21,9 @@ public class Scanner {
         num = id = "";
 
         // ignore space
-        if (c <= ' ') c = input.next();
+        while (c <= ' '){
+            c = input.next();
+        }
 
         // ignore comment
         if (c == '/' && input.getBuffer() == '*') {
