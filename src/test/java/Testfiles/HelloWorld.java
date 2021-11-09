@@ -2,7 +2,10 @@
 
 package Testfiles;
 
+// TODO: remove imports
 // unused import
+import java.io.*;
+// double import
 import java.io.*;
 
 @SuppressWarnings("ALL")

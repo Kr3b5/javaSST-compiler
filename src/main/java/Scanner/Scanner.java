@@ -41,34 +41,8 @@ public class Scanner {
         //reset num & id;
         num = id = "";
 
-        // ignore space
-        while (c <= ' '){
-            c = input.next();
-        }
-
-        // ignore comment /* */
-        if (c == '/' && input.getBuffer() == '*') {
-            c = input.next();  //skip
-            int pre = ' ';
-            while (!(pre == '*' && c == '/')) {
-                pre = c;
-                c = input.next();
-            }
-            c = input.next();
-        }
-
-        // ignore comment //
-        if (c == '/' && input.getBuffer() == '/') {
-            while (!(c == '\n')) {
-                c = input.next();
-            }
-            c = input.next();
-        }
-
-        // ignore space after comments
-        while (c <= ' '){
-            c = input.next();
-        }
+        skipSpace();
+        skipComment();
 
         // ident
         if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) {
@@ -191,7 +165,38 @@ public class Scanner {
             sym = OTHER.id;
             c = input.next();
         }
+    }
 
+    private void skipSpace(){
+        // ignore space
+        while (c <= ' '){
+            c = input.next();
+        }
+    }
 
+    private void skipComment(){
+        // ignore comment /* */
+        if (c == '/' && input.getBuffer() == '*') {
+            c = input.next();  //skip
+            int pre = ' ';
+            while (!(pre == '*' && c == '/')) {
+                pre = c;
+                c = input.next();
+            }
+            c = input.next();
+        }
+
+        // ignore comment //
+        if (c == '/' && input.getBuffer() == '/') {
+            while (!(c == '\n')) {
+                c = input.next();
+            }
+            c = input.next();
+        }
+        skipSpace();
+
+        if ((c == '/' && input.getBuffer() == '*')||(c == '/' && input.getBuffer() == '/')) {
+            skipComment();
+        }
     }
 }
