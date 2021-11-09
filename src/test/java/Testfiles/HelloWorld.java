@@ -1,12 +1,17 @@
+/* HelloWorld.java */
+
 package Testfiles;
 
-/* HelloWorld.java */
+// unused import
+import java.io.*;
+
 @SuppressWarnings("ALL")
 public class HelloWorld
 {
     public static void main(String[] args) {
         System.out.println("Hello World!");
 
+        // declare vars
         int x = 2 + 3 - 1;
         int y = 5 * 7;
         double z = 3 / 2;

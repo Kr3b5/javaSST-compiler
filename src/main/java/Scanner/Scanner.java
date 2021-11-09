@@ -46,7 +46,7 @@ public class Scanner {
             c = input.next();
         }
 
-        // ignore comment
+        // ignore comment /* */
         if (c == '/' && input.getBuffer() == '*') {
             c = input.next();  //skip
             int pre = ' ';
@@ -54,6 +54,19 @@ public class Scanner {
                 pre = c;
                 c = input.next();
             }
+            c = input.next();
+        }
+
+        // ignore comment //
+        if (c == '/' && input.getBuffer() == '/') {
+            while (!(c == '\n')) {
+                c = input.next();
+            }
+            c = input.next();
+        }
+
+        // ignore space after comments
+        while (c <= ' '){
             c = input.next();
         }
 
