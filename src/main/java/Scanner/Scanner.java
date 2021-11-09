@@ -8,7 +8,7 @@ import static Scanner.Symbols.*;
  */
 public class Scanner {
 
-    private Input input;
+    private final Input input;
     private char c;
 
     /**

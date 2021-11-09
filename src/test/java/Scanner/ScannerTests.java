@@ -28,7 +28,7 @@ public class ScannerTests {
                     output = scanner.num;
                 }
 
-                System.out.println( "Sym-ID:" + scanner.sym +
+                System.out.println( "Sym: " + scanner.sym +
                                     " | Sym.ID/NUM: " + output );
             }
         } catch (FileNotFoundException e) {
