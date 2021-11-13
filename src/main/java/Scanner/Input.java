@@ -65,6 +65,6 @@ public class Input implements Iterator<Character> {
      * @return char in buffer
      */
     public Character getBuffer() {
-        return (char) buffer;
+        return (char) this.buffer;
     }
 }

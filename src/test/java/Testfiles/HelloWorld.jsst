@@ -8,10 +8,10 @@ import java.io.*;
 // double import
 import java.io.*;
 
-@SuppressWarnings("ALL")
 public class HelloWorld
 {
-    public static void main(String[] args) {
+    /** TEST */
+    public static void main() {
         System.out.println("Hello World!");
 
         // declare vars
@@ -20,15 +20,15 @@ public class HelloWorld
         double z = 3 / 2;
 
         if( x <= y ){
-            System.out.println("1");
+            println("1");
         }
         if( z >= y ){
-            System.out.println("2");
+            println("2");
         }
         if( x != z ){
-            System.out.println("3,5");
+            println("3,5");
         }else if( x == y ){
-            System.out.println("4");
+            println("4");
         }
     }
 }

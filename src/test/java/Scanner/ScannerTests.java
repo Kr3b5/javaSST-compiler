@@ -11,7 +11,7 @@ public class ScannerTests {
     /** The logger for this class. */
     private static final Logger logger = LogManager.getLogger(ScannerTests.class.getName());
 
-    private static final String TEST_FILE = "./src/test/java/Testfiles/HelloWorld.java";
+    private static final String TEST_FILE = "./src/test/java/Testfiles/HelloWorld.jsst";
 
     @Test
     public void RunOverTestfile(){
@@ -28,8 +28,9 @@ public class ScannerTests {
                     output = scanner.num;
                 }
 
-                System.out.println( "Sym: " + scanner.sym +
-                                    " | Sym.ID/NUM: " + output );
+                //TODO: SAY OK ?
+                System.out.println( scanner.sym +
+                                    " | " + output );
             }
         } catch (FileNotFoundException e) {
             logger.error(e.getMessage());

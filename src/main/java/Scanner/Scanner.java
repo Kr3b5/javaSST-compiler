@@ -11,17 +11,8 @@ public class Scanner {
     private final Input input;
     private char c;
 
-    /**
-     * Symbol
-     */
     public int sym;
-    /**
-     * Ident
-     */
     public String id;
-    /**
-     * Number
-     */
     public String num;
 
     /**
@@ -175,7 +166,7 @@ public class Scanner {
     }
 
     private void skipComment(){
-        // ignore comment /* */
+        // ignore comment /* */ and /** */
         if (c == '/' && input.getBuffer() == '*') {
             c = input.next();  //skip
             int pre = ' ';
@@ -193,6 +184,7 @@ public class Scanner {
             }
             c = input.next();
         }
+
         skipSpace();
 
         if ((c == '/' && input.getBuffer() == '*')||(c == '/' && input.getBuffer() == '/')) {
