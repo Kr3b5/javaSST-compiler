@@ -6,6 +6,7 @@ package Scanner;
  */
 public enum Symbols {
 
+    // terminals
     IDENT       (0),        // ident
     NUMBER      (1),        // number
     LPAREN      (2),        // (
@@ -26,7 +27,18 @@ public enum Symbols {
     LCBRACKET   (17),       // {
     RCBRACKET   (18),       // }
 
-    // Schlüsselworte
+    // keywords
+    CLASS       (30),
+    PUBLIC      (31),
+    FINAL       (32),
+    VOID        (33),
+    INT         (34),
+    IF          (35),
+    ELSE        (36),
+    WHILE       (37),
+    RETURN      (38),
+
+    // other
     OTHER       (99);
 
 

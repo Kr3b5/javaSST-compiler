@@ -45,6 +45,7 @@ public class Scanner {
             } while ((c >= 'a' && c <= 'z') ||
                     (c >= 'A' && c <= 'Z') ||
                     (c >= '0' && c <= '9'));
+            checkkeyword();
         }
         // number
         else if (c >= '0' && c <= '9') {
@@ -147,6 +148,22 @@ public class Scanner {
             c = input.next();
         }
     }
+
+    private void checkkeyword(){
+        switch (id) {
+            case "class" -> sym = CLASS.id;
+            case "public" -> sym = PUBLIC.id;
+            case "final" -> sym = FINAL.id;
+            case "void" -> sym = VOID.id;
+            case "int" -> sym = INT.id;
+            case "if" -> sym = IF.id;
+            case "else" -> sym = ELSE.id;
+            case "while" -> sym = WHILE.id;
+            case "return" -> sym = RETURN.id;
+            default -> {}
+        }
+    }
+
 
     private void skipSpace(){
         // ignore space
