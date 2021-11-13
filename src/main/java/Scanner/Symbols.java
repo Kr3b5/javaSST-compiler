@@ -14,19 +14,19 @@ public enum Symbols {
     MINUS       (5),        // -
     TIMES       (6),        // *
     SLASH       (7),        // /
-    LBRACKET    (8),        // [
-    RBRACKET    (9),        // ]
-    COMMA       (10),       // ,
-    SEMI        (11),       // ;
-    ASSIGN      (12),       // =
-    EQUAL       (13),       // ==
-    NEQUAL      (14),       // !=
-    GREATER     (15),       // >
-    SMALLER     (16),       // <
-    GR_EQ       (17),       // >=
-    SM_EQ       (18),       // <=
-    LCBRACKET  (19),       // {
-    RCBRACKET  (20),       // }
+    COMMA       (8),       // ,
+    SEMI        (9),       // ;
+    ASSIGN      (10),       // =
+    EQUAL       (11),       // ==
+    NEQUAL      (12),       // !=
+    GREATER     (13),       // >
+    SMALLER     (14),       // <
+    GR_EQ       (15),       // >=
+    SM_EQ       (16),       // <=
+    LCBRACKET   (17),       // {
+    RCBRACKET   (18),       // }
+
+    // Schlüsselworte
     OTHER       (99);
 
 

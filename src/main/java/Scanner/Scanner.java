@@ -85,16 +85,6 @@ public class Scanner {
             sym = SLASH.id;
             c = input.next();
         }
-        // [
-        else if (c == '[') {
-            sym = RBRACKET.id;
-            c = input.next();
-        }
-        // ]
-        else if (c == ']') {
-            sym = LBRACKET.id;
-            c = input.next();
-        }
         // ,
         else if (c == ',') {
             sym = COMMA.id;
