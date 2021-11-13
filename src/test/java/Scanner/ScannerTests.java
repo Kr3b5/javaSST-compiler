@@ -29,8 +29,14 @@ public class ScannerTests {
                 }
 
                 //TODO: SAY OK ?
-                System.out.println( scanner.sym +
-                                    " | " + output );
+                if(scanner.sym != 99){
+                    System.out.println( "OK - " + scanner.sym + " | " + output );
+                }else if(scanner.sym == 99){
+                    System.out.println( "Unknown Sym - " + scanner.sym + " | " + output );
+                }else{
+                    System.out.println( "NOT OK!" );
+                }
+
             }
         } catch (FileNotFoundException e) {
             logger.error(e.getMessage());
