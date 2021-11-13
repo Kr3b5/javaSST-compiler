@@ -10,8 +10,10 @@ public class Scanner {
 
     private final Input input;
     private char c;
+    private int position = 0;
 
-    public int sym;
+    public Token token;
+
     public String id;
     public String num;
 
@@ -37,7 +39,7 @@ public class Scanner {
 
         // ident
         if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) {
-            sym = IDENT.id;
+            token = new Token(IDENT, position);
             id = "";
             do {
                 id += c;
@@ -49,7 +51,7 @@ public class Scanner {
         }
         // number
         else if (c >= '0' && c <= '9') {
-            sym = NUMBER.id;
+            token = new Token(NUMBER, position);
             num = "";
             do {
                 num += c;
@@ -58,108 +60,110 @@ public class Scanner {
         }
         // (
         else if (c == '(') {
-            sym = LPAREN.id;
+            token = new Token(LPAREN, position);
             c = input.next();
         }
         // )
         else if (c == ')') {
-            sym = RPAREN.id;
+            token = new Token(RPAREN, position);
             c = input.next();
         }
         // +
         else if (c == '+') {
-            sym = PLUS.id;
+            token = new Token(PLUS, position);
             c = input.next();
         }
         // -
         else if (c == '-') {
-            sym = MINUS.id;
+            token = new Token(MINUS, position);
             c = input.next();
         }
         // *
         else if (c == '*') {
-            sym = TIMES.id;
+            token = new Token(TIMES, position);
             c = input.next();
         }
         // /
         else if (c == '/') {
-            sym = SLASH.id;
+            token = new Token(SLASH, position);
             c = input.next();
         }
         // ,
         else if (c == ',') {
-            sym = COMMA.id;
+            token = new Token(COMMA, position);
             c = input.next();
         }
         // ;
         else if (c == ';') {
-            sym = SEMI.id;
+            token = new Token(SEMI, position);
             c = input.next();
         }
         // =
         else if (c == '=') {
-            sym = ASSIGN.id;
+            token = new Token(ASSIGN, position);
             // ==
             if (input.getBuffer() == '=') {
-                sym = EQUAL.id;
+                token = new Token(EQUAL, position);
                 c = input.next();
             }
             c = input.next();
         }
         // >
         else if (c == '>') {
-            sym = GREATER.id;
+            token = new Token(GREATER, position);
             // >=
             if (input.getBuffer() == '=') {
-                sym = GR_EQ.id;
+                token = new Token(GR_EQ, position);
                 c = input.next();
             }
             c = input.next();
         }
         // <
         else if (c == '<') {
-            sym = SMALLER.id;
+            token = new Token(SMALLER, position);
             // <=
             if (input.getBuffer() == '=') {
-                sym = SM_EQ.id;
+                token = new Token(SM_EQ, position);
                 c = input.next();
             }
             c = input.next();
         }
         // !=
         else if (c == '!' && input.getBuffer() == '=') {
-            sym = NEQUAL.id;
+            token = new Token(NEQUAL, position);
             c = input.next();
             c = input.next();
         }
         // {
         else if (c == '{') {
-            sym = LCBRACKET.id;
+            token = new Token(LCBRACKET, position);
             c = input.next();
         }
         // }
         else if (c == '}') {
-            sym = RCBRACKET.id;
+            token = new Token(RCBRACKET, position);
             c = input.next();
         }
         // OTHER
         else{
-            sym = OTHER.id;
+            token = new Token(OTHER, position);
             c = input.next();
         }
+
+        position++;
     }
 
     private void checkkeyword(){
         switch (id) {
-            case "class" -> sym = CLASS.id;
-            case "public" -> sym = PUBLIC.id;
-            case "final" -> sym = FINAL.id;
-            case "void" -> sym = VOID.id;
-            case "int" -> sym = INT.id;
-            case "if" -> sym = IF.id;
-            case "else" -> sym = ELSE.id;
-            case "while" -> sym = WHILE.id;
-            case "return" -> sym = RETURN.id;
+            case "class"    -> token = new Token(CLASS, position);
+            case "public"   -> token = new Token(PUBLIC, position);
+            case "final"    -> token = new Token(FINAL, position);
+            case "void"     -> token = new Token(VOID, position);
+            case "int"      -> token = new Token(INT, position);
+            case "if"       -> token = new Token(IF, position);
+            case "else"     -> token = new Token(ELSE, position);
+            case "while"    -> token = new Token(WHILE, position);
+            case "return"   -> token = new Token(RETURN, position);
             default -> {}
         }
     }

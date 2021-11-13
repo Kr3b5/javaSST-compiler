@@ -28,11 +28,16 @@ public class ScannerTests {
                     output = scanner.num;
                 }
 
-                //TODO: SAY OK ?
-                if(scanner.sym != 99){
-                    System.out.println( "OK - " + scanner.sym + " | " + output );
-                }else if(scanner.sym == 99){
-                    System.out.println( "Unknown Sym - " + scanner.sym + " | " + output );
+                if(scanner.token.getSymbol().id != 99){
+                    System.out.println( "OK - " + scanner.token.getSymbol().id      + " | "
+                                                + scanner.token.getSymbol().name()  + " | "
+                                                + scanner.token.getPosition()       + " | "
+                                                + output );
+                }else if(scanner.token.getSymbol().id == 99){
+                    System.out.println( "UO - " + scanner.token.getSymbol().id      + " | "
+                                                + scanner.token.getSymbol().name()  + " | "
+                                                + scanner.token.getPosition()       + " | "
+                                                + output );
                 }else{
                     System.out.println( "NOT OK!" );
                 }
