@@ -51,12 +51,8 @@ public class Parser {
 
 
     private void checkIdent() {
-        if(readNextToken()){
-            if(!actualToken.getType().name().equals("IDENT")){
-                printError(ParserErrors.ERROR_IDENT.message);
-            }
-        }else{
-            printError(ParserErrors.ERROR_EOF.message);
+        if(!readNextToken() || !actualToken.getType().name().equals("IDENT")){
+            printError(ParserErrors.ERROR_IDENT.message);
         }
     }
 
@@ -69,22 +65,14 @@ public class Parser {
     }
 
     private void checkLCBracket(){
-        if(readNextToken()){
-            if(!actualToken.getType().name().equals("LCBRACKET")){
-                printError(ParserErrors.ERROR_LCBRACKET.message);
-            }
-        }else{
-            printError(ParserErrors.ERROR_EOF.message);
+        if(!readNextToken() || !actualToken.getType().name().equals("LCBRACKET")){
+            printError(ParserErrors.ERROR_LCBRACKET.message);
         }
     }
 
     private void checkRCBracket(){
-        if(readNextToken()){
-            if(!actualToken.getType().name().equals("RCBRACKET")){
-                printError(ParserErrors.ERROR_RCBRACKET.message);
-            }
-        }else{
-            printError(ParserErrors.ERROR_EOF.message);
+        if( !readNextToken() || !actualToken.getType().name().equals("RCBRACKET") ){
+            printError(ParserErrors.ERROR_RCBRACKET.message);
         }
     }
 
