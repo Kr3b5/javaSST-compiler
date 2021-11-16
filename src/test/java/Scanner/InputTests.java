@@ -10,7 +10,7 @@ public class InputTests {
     /** The logger for this class. */
     private static final Logger logger = LogManager.getLogger(InputTests.class.getName());
 
-    private static final String TEST_FILE = "./src/test/java/Testfiles/HelloWorld.java";
+    private static final String TEST_FILE = "./src/test/resources/pass_test/CompleteTest.jsst";
 
     @Test
     public void Run_without_error() {

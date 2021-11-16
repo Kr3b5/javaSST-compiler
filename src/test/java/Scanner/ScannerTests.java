@@ -11,14 +11,27 @@ public class ScannerTests {
     /** The logger for this class. */
     private static final Logger logger = LogManager.getLogger(ScannerTests.class.getName());
 
-    private static final String TEST_FILE = "./src/test/java/Testfiles/HelloWorld.jsst";
-
     private Scanner scanner;
 
+
+    private static final String COMPLETE_TEST = "./src/test/resources/pass_test/CompleteTest.jsst";
+    private static final String EMPTY_CLASS_TEST = "./src/test/resources/pass_test/EmptyClass.jsst";
+
     @Test
-    public void RunOverTestfile(){
+    public void CompleteTest(){
+        RunOverFile(COMPLETE_TEST);
+    }
+
+    @Test
+    public void EmptyClassTest(){
+        RunOverFile(EMPTY_CLASS_TEST);
+    }
+
+
+
+    public void RunOverFile(String Path){
         try {
-            scanner = new Scanner(TEST_FILE);
+            scanner = new Scanner(Path);
             while (scanner.hasNext()){
                 scanner.getSym();
                 printOutput(scanner.getValue());

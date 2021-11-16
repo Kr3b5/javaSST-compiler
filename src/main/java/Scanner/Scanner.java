@@ -30,7 +30,7 @@ public class Scanner {
      *
      * @param filepath Input instance
      */
-    Scanner(String filepath) throws FileNotFoundException {
+    public Scanner(String filepath) throws FileNotFoundException {
         this.input = new Input(filepath);
         file = new File(filepath).getName();
         line = 1;
