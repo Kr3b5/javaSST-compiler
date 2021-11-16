@@ -18,18 +18,17 @@ public class ScannerTests {
     private static final String EMPTY_CLASS_TEST = "./src/test/resources/pass_test/EmptyClass.jsst";
 
     @Test
-    public void CompleteTest(){
-        RunOverFile(COMPLETE_TEST);
+    public void completeTest(){
+        runOverFile(COMPLETE_TEST);
     }
 
     @Test
-    public void EmptyClassTest(){
-        RunOverFile(EMPTY_CLASS_TEST);
+    public void emptyClassTest(){
+        runOverFile(EMPTY_CLASS_TEST);
     }
 
 
-
-    public void RunOverFile(String Path){
+    public void runOverFile(String Path){
         try {
             scanner = new Scanner(Path);
             while (scanner.hasNext()){
