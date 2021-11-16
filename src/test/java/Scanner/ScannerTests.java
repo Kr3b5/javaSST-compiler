@@ -13,41 +13,30 @@ public class ScannerTests {
 
     private static final String TEST_FILE = "./src/test/java/Testfiles/HelloWorld.jsst";
 
+    private Scanner scanner;
+
     @Test
     public void RunOverTestfile(){
         try {
-            Input input = new Input(TEST_FILE);
-            Scanner scanner = new Scanner(input);
-            while (input.hasNext()){
+            scanner = new Scanner(TEST_FILE);
+            while (scanner.hasNext()){
                 scanner.getSym();
-
-                String output = null;
-                if(!scanner.id.equals("")) {
-                    output = scanner.id;
-                }else if(!scanner.num.equals("")){
-                    output = scanner.num;
-                }
-
-                if(scanner.token.getSymbol().id != 99){
-                    System.out.println( "OK - " + scanner.token.getSymbol().id      + " | "
-                                                + scanner.token.getSymbol().name()  + " | "
-                                                + scanner.token.getPosition()       + " | "
-                                                + output );
-                }else if(scanner.token.getSymbol().id == 99){
-                    System.out.println( "UO - " + scanner.token.getSymbol().id      + " | "
-                                                + scanner.token.getSymbol().name()  + " | "
-                                                + scanner.token.getPosition()       + " | "
-                                                + output );
-                }else{
-                    System.out.println( "NOT OK!" );
-                }
-
+                printOutput(scanner.getValue());
             }
+            printOutput(scanner.getValue());
         } catch (FileNotFoundException e) {
             logger.error(e.getMessage());
         }
     }
 
+    private void printOutput(String value){
+        String out = scanner.getToken().getPosition().getFilename()    + "("
+                + scanner.getToken().getPosition().getLine()      + ","
+                + scanner.getToken().getPosition().getColumn()    + "): "
+                + scanner.getToken().getType().name();
+        if(!value.equals("")) out = out + "[" + value + "]";
+        System.out.println( out );
+    }
 
 
 

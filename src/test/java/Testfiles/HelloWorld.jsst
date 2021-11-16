@@ -1,33 +1,40 @@
-/* HelloWorld.java */
-package Testfiles;
+/**
+ * HelloWorld.jsst
+ * @author Mustermann
+ */
 
-// TODO: remove imports
-// unused import
-import java.io.*;
-// double import
-import java.io.*;
-
-public class HelloWorld
+class HelloWorld
 {
-    /** TEST */
+    // globals
+    // i
+    final int i = 1;
+
+    // main function
     public void main() {
-        System.out.println("Hello World!");
 
-        // declare vars
-        int x = 2 + 3 - 1;
-        int y = 5 * 7;
-        int z = 3 / 2;
+        int x;
+        int y;
+        x = 4;
+        y = 5;
 
-        if( x <= y ){
-            println("1");
+        if( x <= y ){ addI(x); }
+        if( x < y ){ addI(x); }
+        if( x >= y ){ addI(y); }
+        if( x > y ){ addI(y); }
+
+        if( x == y ){ addI(1);  }
+        else{
+            addI(0);
         }
-        if( z >= y ){
-            println("2");
+
+        while( x != y){
+            x + 1;
         }
-        if( x != z ){
-            println("3,5");
-        }else if( x == y ){
-            println("4");
-        }
+
+    }
+
+    // add method
+    public int addI(int z) {
+        return z + i;
     }
 }

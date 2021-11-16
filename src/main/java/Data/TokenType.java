@@ -1,10 +1,10 @@
-package Scanner;
+package Data;
 
 /**
  * Enum of symbols
  * @author Kr3b5
  */
-public enum Symbols {
+public enum TokenType {
 
     // terminals
     IDENT       (0),        // ident
@@ -39,7 +39,8 @@ public enum Symbols {
     RETURN      (38),
 
     // other
-    OTHER       (99);
+    OTHER       (99),
+    EOF         (100);
 
 
     /**
@@ -47,7 +48,7 @@ public enum Symbols {
      */
     public final int id;
 
-    Symbols(int symbol) {
+    TokenType(int symbol) {
         this.id = symbol;
     }
 }
