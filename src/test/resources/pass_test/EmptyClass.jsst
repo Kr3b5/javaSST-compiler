@@ -3,7 +3,5 @@
  * @author Mustermann
  */
 
-class HelloWorld
-{
-
+class Hello{
 }

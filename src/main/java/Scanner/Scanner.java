@@ -169,6 +169,11 @@ public class Scanner {
         }
     }
 
+    /**
+     * Checks keyword or ident
+     *
+     * @param column the beginning column
+     */
     private void isKeywordorIdent(int column){
         switch (value) {
             case "class"    -> token = new Token(CLASS, file, line, column);
@@ -184,7 +189,9 @@ public class Scanner {
         }
     }
 
-
+    /**
+     * Skip spaces
+     */
     private void skipSpace(){
         // ignore space
         while (c <= ' '){
@@ -192,6 +199,9 @@ public class Scanner {
         }
     }
 
+    /**
+     * Skip single and multiline comments
+     */
     private void skipComment(){
         // ignore comment /* */ and /** */
         if (c == '/' && input.getBuffer() == '*') {
@@ -219,17 +229,26 @@ public class Scanner {
         }
     }
 
+    /**
+     * Load next char from file and increments the column + checks if new lines begin
+     */
     private void loadNext(){
         c = input.next();
         column++;
         if (c == '\n') setNewline();
     }
 
+    /**
+     * If new line begins, the line is incremented and column is set to 0
+     */
     private void setNewline() {
         line++;
         column = 0;
     }
 
+    /**
+     * Interface for input check, if the file has a next char or the EOF is reached
+     */
     public boolean hasNext(){
         if(input.hasNext()){
             return true;
