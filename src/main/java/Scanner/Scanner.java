@@ -121,7 +121,7 @@ public class Scanner {
             token = new Token(ASSIGN, file, line, column);
             // ==
             if (input.getBuffer() == '=') {
-                token = new Token(EQUAL, file, line, column);
+                token = new Token(EQUAL, file, line, column - 1);
                 loadNext();
             }
             loadNext();
@@ -131,7 +131,7 @@ public class Scanner {
             token = new Token(GREATER, file, line, column);
             // >=
             if (input.getBuffer() == '=') {
-                token = new Token(GR_EQ, file, line, column);
+                token = new Token(GR_EQ, file, line, column - 1);
                 loadNext();
             }
             loadNext();
@@ -141,7 +141,7 @@ public class Scanner {
             token = new Token(SMALLER, file, line, column);
             // <=
             if (input.getBuffer() == '=') {
-                token = new Token(SM_EQ, file, line, column);
+                token = new Token(SM_EQ, file, line, column - 1);
                 loadNext();
             }
             loadNext();
