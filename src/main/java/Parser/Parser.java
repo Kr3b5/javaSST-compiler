@@ -10,7 +10,9 @@ import java.io.FileNotFoundException;
 
 public class Parser {
 
-    /** The logger for this class. */
+    /**
+     * The logger for this class.
+     */
     private static final Logger logger = LogManager.getLogger(Parser.class.getName());
 
     private final Scanner scanner;
@@ -37,135 +39,188 @@ public class Parser {
     //-------------------------------------------------------------------------------------------------------
 
     // structs
-    private void checkClass(){
-        if(readNextToken()){
-            if( actualToken.getType().name().equals(TokenType.CLASS.name())){
+
+    /**
+     *  Check: class = “class“ ident classbody
+     */
+    private void checkClass() {
+        if (readNextToken()) {
+            if (actualToken.getType().name().equals(TokenType.CLASS.name())) {
                 checkIdent();
                 checkClassbody();
-            }else{
+            } else {
                 printError(ParserErrors.ERROR_CLASS.message);
             }
+        } else {
+            printError(ParserErrors.ERROR_EMPTY.message);
         }
     }
 
+    /**
+     *  Check: classbody = ”{“ declarations “}”
+     */
     private void checkClassbody() {
         checkLCBracket();
         checkDeclaration();
-        checkRCBracket_noRead();
+        checkRCBracket();
     }
 
+    /**
+     *  Check: declarations =   { “final” type ident “=” expression “;” }
+     *                          { type ident “;” }
+     *                          { method_declaration }
+     */
     private void checkDeclaration() {
-        if(readNextToken()){
-            // TODO wiederholen
-            if(actualToken.getType().name().equals(TokenType.FINAL.name())){
-                checkType();
-                checkIdent();
-                checkAssign();
-                checkExpression(true);
-                checkSemicolon();
-            }else if(actualToken.getType().name().equals(TokenType.INT.name())){
-                checkIdent();
-                checkSemicolon();
-            }else if(!actualToken.getType().name().equals(TokenType.RCBRACKET.name())){
-                checkMethodDeclaration();
-            }
+        while(bufferToken.getType().name().equals(TokenType.FINAL.name())) {
+            readNextToken();    //read buffer to actualToken
+            checkType();
+            checkIdent();
+            checkAssign();
+            checkExpression();
+            checkSemicolon();
+            checkDeclaration(); // check repeating declarations
+        }
+        while(bufferToken.getType().name().equals(TokenType.INT.name())) {
+            readNextToken();    //read buffer to actualToken
+            checkIdent();
+            checkSemicolon();
+            checkDeclaration(); // check repeating declarations
+        }
+        while(!bufferToken.getType().name().equals(TokenType.RCBRACKET.name())) {
+            checkMethodDeclaration();
+            checkDeclaration(); // check repeating declarations
         }
     }
 
+    /**
+     *  Check: method_declaration = method_head method_body
+     */
     private void checkMethodDeclaration() {
         checkMethodHead();
         checkMethodBody();
     }
 
+    /**
+     *  Check: method_head = “public” method_type ident formal_parameters
+     */
     private void checkMethodHead() {
-        if(actualToken.getType().name().equals(TokenType.PUBLIC.name())){
+            checkPublic();
             checkMethodType();
             checkIdent();
             checkFormalParameters();
-        }else{
-            printError(ParserErrors.ERROR_PUBLIC.message);
-        }
-
     }
 
+
+
+    /**
+     *  Check: formal_parameters = “(“ [fp_section {“,” fp_section}] “)”
+     */
     private void checkFormalParameters() {
         checkLBracket();
-        do{
+        if( bufferToken.getType().name().equals(TokenType.INT.name()) ){
             checkFpSection();
-        }while (readNextToken() && actualToken.getType().name().equals(TokenType.COMMA.name()));
+            while( bufferToken.getType().name().equals(TokenType.COMMA.name()) ){
+                readNextToken(); //read checked tokens from buffer
+                checkFpSection();
+            }
+        }
         checkRBracket();
     }
 
+    /**
+     *  Check: fp_section = type ident
+     */
     private void checkFpSection() {
         checkType();
         checkIdent();
     }
 
-
+    /**
+     *  Check: method_body = “{“ {local_declaration} statement_sequence“}”
+     */
     private void checkMethodBody() {
         checkLCBracket();
-        //TODO nothing or sth
-        checkLocalDeclaration();
+        while ( bufferToken.getType().name().equals(TokenType.INT.name()) ){
+            checkLocalDeclaration();
+        }
         checkStatementSequenz();
         checkRCBracket();
     }
 
+    /**
+     *  Check: local_declaration = type ident “;”
+     */
     private void checkLocalDeclaration() {
         checkType();
         checkIdent();
         checkSemicolon();
     }
 
-
+    /**
+     *  Check: statement_sequence = statement {statement}.
+     */
     private void checkStatementSequenz() {
-        checkStatement(true);
-        while (readNextToken() && (
-                        actualToken.getType().name().equals(TokenType.IDENT.name()) |
-                        actualToken.getType().name().equals(TokenType.IF.name())    |
-                        actualToken.getType().name().equals(TokenType.WHILE.name()) |
-                        actualToken.getType().name().equals(TokenType.RETURN.name()) ) ){
-            checkStatement(false);
+        checkStatement();
+        while ( bufferToken.getType().name().equals(TokenType.IDENT.name())  |
+                bufferToken.getType().name().equals(TokenType.IF.name())     |
+                bufferToken.getType().name().equals(TokenType.WHILE.name())  |
+                bufferToken.getType().name().equals(TokenType.RETURN.name()) ){
+            checkStatement();
         }
     }
 
-
-    private void checkStatement(boolean readin) {
-        if(readin) readNextToken();
-        if(actualToken.getType().name().equals(TokenType.IDENT.name())){
-            if(readNextToken() && actualToken.getType().name().equals(TokenType.ASSIGN.name())){
+    /**
+     *  Check: statement = assignment | procedure_call | if_statement | while_statement | return_statement.
+     */
+    private void checkStatement() {
+        readNextToken(); //read token to check statement
+        if ( actualToken.getType().name().equals(TokenType.IDENT.name()) &&
+             bufferToken.getType().name().equals(TokenType.ASSIGN.name()) ){
                 checkAssignment();
-            }else if (readNextToken() && actualToken.getType().name().equals(TokenType.LPAREN.name())){
-                checkProcedureCall();
-            }else{
-                printError(ParserErrors.ERROR_STATEMENT.message);
-            }
         }
-        if(actualToken.getType().name().equals(TokenType.IF.name()))            checkIfStatement();
-        else if(actualToken.getType().name().equals(TokenType.WHILE.name()))    checkWhileStatement();
-        else if(actualToken.getType().name().equals(TokenType.RETURN.name()))   checkReturnStatement();
+        else if ( actualToken.getType().name().equals(TokenType.IDENT.name()) &&
+                  bufferToken.getType().name().equals(TokenType.LPAREN.name()) ){
+                checkProcedureCall();
+        }
+        else if (actualToken.getType().name().equals(TokenType.IF.name())) checkIfStatement();
+        else if (actualToken.getType().name().equals(TokenType.WHILE.name())) checkWhileStatement();
+        else if (actualToken.getType().name().equals(TokenType.RETURN.name())) checkReturnStatement();
         else printError(ParserErrors.ERROR_STATEMENT.message);
     }
 
+    /**
+     *  Check: assignment = ident “=” expression “;”
+     */
     private void checkAssignment() {
-        // IDENT + "=" already checked in checkStatement()
-        checkExpression(true);
+        // IDENT already checked in checkStatement()
+        checkAssign();
+        checkExpression();
         checkSemicolon();
     }
 
+    /**
+     *  Check: procedure_call = intern_procedure_call “;”
+     */
     private void checkProcedureCall() {
         checkInternProcedureCall();
         checkSemicolon();
     }
 
+    /**
+     *  Check: intern_procedure_call = ident actual_parameters
+     */
     private void checkInternProcedureCall() {
         // IDENT already checked in checkStatement()
         checkActualParameters();
     }
 
+    /**
+     *  Check: if_statement = “if” “(“ expression “)” “{“ statement_sequence “}” “else” “{“ statement_sequence “}”
+     */
     private void checkIfStatement() {
         // IF already checked in checkStatement()
         checkLBracket();
-        checkExpression(true);
+        checkExpression();
         checkRBracket();
         checkLCBracket();
         checkStatementSequenz();
@@ -176,80 +231,98 @@ public class Parser {
         checkRCBracket();
     }
 
+    /**
+     *  Check: while_statement = “while” “(“ expression “)” “{“ statement_sequence “}”
+     */
     private void checkWhileStatement() {
         // WHILE already checked in checkStatement()
-        checkRBracket();
-        checkExpression(true);
         checkLBracket();
-        checkRCBracket();
+        checkExpression();
+        checkRBracket();
+        checkLCBracket();
         checkStatementSequenz();
         checkRCBracket();
     }
 
+    /**
+     *  Check: return_statement = “return” [ simple_expression ] “;”
+     */
     private void checkReturnStatement() {
         // RETURN already checked in checkStatement()
-        if(readNextToken() && ( actualToken.getType().name().equals(TokenType.IDENT.name()) ||
-                                actualToken.getType().name().equals(TokenType.NUMBER.name())) ){
-            checkSimpleExpression(false);
-        }else if(!actualToken.getType().name().equals(TokenType.SEMI.name())){
-            printError(ParserErrors.ERROR_SEMI.message);
+        if ( bufferToken.getType().name().equals(TokenType.IDENT.name()) ||
+             bufferToken.getType().name().equals(TokenType.NUMBER.name()) ){
+            checkSimpleExpression();
         }
+        checkSemicolon();
     }
 
+    /**
+     *  Check: actual_parameters = “(“ [expression {“,” expression}]“)”
+     */
     private void checkActualParameters() {
-        // LPAREN already checked in checkStatement()
-        if(readNextToken() &&  (actualToken.getType().name().equals(TokenType.IDENT.name())||
-                                actualToken.getType().name().equals(TokenType.NUMBER.name()) )){
-            checkExpression(false);
-            while (readNextToken() && actualToken.getType().name().equals(TokenType.COMMA.name())){
-                checkExpression(true);
+        checkLBracket();
+        if ( bufferToken.getType().name().equals(TokenType.IDENT.name()) ||
+             bufferToken.getType().name().equals(TokenType.NUMBER.name()) ){
+            checkExpression();
+            while (bufferToken.getType().name().equals(TokenType.COMMA.name())) {
+                readNextToken(); //read checked tokens from buffer
+                checkExpression();
             }
-        }else if(!actualToken.getType().name().equals(TokenType.RPAREN.name())){
-            printError(ParserErrors.ERROR_RPAREN.message);
+        }
+        checkRBracket();
+    }
+
+    /**
+     *  Check: expression = simple_expression [(“==” | “<” | ”<= ” | “>” | ”>= ”) simple_expression]
+     */
+    private void checkExpression() {
+        checkSimpleExpression();
+        if ( bufferToken.getType().name().equals(TokenType.EQUAL.name())   ||
+             bufferToken.getType().name().equals(TokenType.SMALLER.name()) ||
+             bufferToken.getType().name().equals(TokenType.SM_EQ.name())   ||
+             bufferToken.getType().name().equals(TokenType.GREATER.name()) ||
+             bufferToken.getType().name().equals(TokenType.GR_EQ.name())   ){
+            readNextToken(); //read checked tokens from buffer
+            checkSimpleExpression();
         }
     }
 
-    private void checkExpression(boolean readin) {
-        if(readin) readNextToken();
-        checkSimpleExpression(false);
-        if( readNextToken() &&  ( actualToken.getType().name().equals(TokenType.EQUAL.name())     ||
-                                  actualToken.getType().name().equals(TokenType.SMALLER.name())   ||
-                                  actualToken.getType().name().equals(TokenType.SM_EQ.name())     ||
-                                  actualToken.getType().name().equals(TokenType.GREATER.name())   ||
-                                  actualToken.getType().name().equals(TokenType.GR_EQ.name()) )){
-            checkSimpleExpression(true);
-        }else{
-            printError(ParserErrors.ERROR_SIMPLE_EXP.message);
-        }
-    }
-
-    private void checkSimpleExpression(boolean readin) {
-        if(readin) readNextToken();
+    /**
+     *  Check: simple_expression = term {(“+” | ”-” ) term}
+     */
+    private void checkSimpleExpression() {
         checkTerm();
-        while ( bufferToken.getType().name().equals(TokenType.PLUS.name())  ||
-                bufferToken.getType().name().equals(TokenType.MINUS.name()) ){
-            readNextToken();
+        while ( bufferToken.getType().name().equals(TokenType.PLUS.name()) ||
+                bufferToken.getType().name().equals(TokenType.MINUS.name())) {
+            readNextToken(); //read checked tokens from buffer
             checkTerm();
         }
     }
 
+    /**
+     *  Check: term = factor {(“*” | ”/ “ ) factor}
+     */
     private void checkTerm() {
         checkFactor();
-        while ( bufferToken.getType().name().equals(TokenType.TIMES.name())  ||
+        while ( bufferToken.getType().name().equals(TokenType.TIMES.name()) ||
                 bufferToken.getType().name().equals(TokenType.SLASH.name()) ){
-            readNextToken();
+            readNextToken(); //read checked tokens from buffer
             checkFactor();
         }
     }
 
+    /**
+     *  Check: factor = ident | number | “(“ expression”)” | intern_procedure_call
+     */
     private void checkFactor() {
-        if( actualToken.getType().name().equals(TokenType.LPAREN.name())  ){
-            checkExpression(true);
-        }else if(  actualToken.getType().name().equals(TokenType.IDENT.name()) &&
-                   bufferToken.getType().name().equals(TokenType.LPAREN.name()) ){
+        readNextToken();
+        if (actualToken.getType().name().equals(TokenType.LPAREN.name())) {
+            checkExpression();
+        } else if ( actualToken.getType().name().equals(TokenType.IDENT.name()) &&
+                    bufferToken.getType().name().equals(TokenType.LPAREN.name()) ){
             checkInternProcedureCall();
-        }else if(!actualToken.getType().name().equals(TokenType.IDENT.name()) ||
-                 !actualToken.getType().name().equals(TokenType.NUMBER.name())){
+        } else if ( !(actualToken.getType().name().equals(TokenType.IDENT.name()) ||
+                      actualToken.getType().name().equals(TokenType.NUMBER.name())) ){
             printError(ParserErrors.ERROR_FACTOR.message);
         }
     }
@@ -257,88 +330,86 @@ public class Parser {
 
     //-------------------------------------------------------------------------------------------------------
 
-    // Terminals without readNextToken
-    private void checkRCBracket_noRead(){
-        if( !actualToken.getType().name().equals(TokenType.RCBRACKET.name()) ){
-            printError(ParserErrors.ERROR_RCBRACKET.message);
-        }
-    }
-
-
     // Terminals
     private void checkIdent() {
-        if(!readNextToken() || !actualToken.getType().name().equals(TokenType.IDENT.name())){
+        if (!readNextToken() || !actualToken.getType().name().equals(TokenType.IDENT.name())) {
             printError(ParserErrors.ERROR_IDENT.message);
         }
     }
 
-    private void checkLCBracket(){
-        if(!readNextToken() || !actualToken.getType().name().equals(TokenType.LCBRACKET.name())){
+    private void checkLCBracket() {
+        if (!readNextToken() || !actualToken.getType().name().equals(TokenType.LCBRACKET.name())) {
             printError(ParserErrors.ERROR_LCBRACKET.message);
         }
     }
 
     private void checkRCBracket() {
-        if(!readNextToken() || !actualToken.getType().name().equals(TokenType.RCBRACKET.name())){
+        if (!readNextToken() || !actualToken.getType().name().equals(TokenType.RCBRACKET.name())) {
             printError(ParserErrors.ERROR_RCBRACKET.message);
         }
     }
 
     private void checkSemicolon() {
-        if(!readNextToken() || !actualToken.getType().name().equals(TokenType.SEMI.name()) ){
+        if (!readNextToken() || !actualToken.getType().name().equals(TokenType.SEMI.name())) {
             printError(ParserErrors.ERROR_SEMI.message);
         }
     }
 
     private void checkAssign() {
-        if(!readNextToken() || !actualToken.getType().name().equals(TokenType.ASSIGN.name()) ){
+        if (!readNextToken() || !actualToken.getType().name().equals(TokenType.ASSIGN.name())) {
             printError(ParserErrors.ERROR_ASSIGN.message);
         }
     }
 
     private void checkType() {
-        if(!readNextToken() || !actualToken.getType().name().equals(TokenType.INT.name()) ){
-            printError(ParserErrors.ERROR_INT.message);
+        if (!readNextToken() || !actualToken.getType().name().equals(TokenType.INT.name())) {
+            printError(ParserErrors.ERROR_TYPE.message);
         }
     }
 
     private void checkMethodType() {
-        if(!readNextToken() || !actualToken.getType().name().equals(TokenType.INT.name()) |
-                                !actualToken.getType().name().equals(TokenType.VOID.name()) ){
+        if (!readNextToken() || !(  actualToken.getType().name().equals(TokenType.INT.name()) ||
+                                    actualToken.getType().name().equals(TokenType.VOID.name()) ) ) {
             printError(ParserErrors.ERROR_METHOD_TYPE.message);
         }
     }
 
     private void checkLBracket() {
-        if(!readNextToken() || !actualToken.getType().name().equals(TokenType.LPAREN.name()) ){
+        if (!readNextToken() || !actualToken.getType().name().equals(TokenType.LPAREN.name())) {
             printError(ParserErrors.ERROR_LPAREN.message);
         }
     }
 
     private void checkRBracket() {
-        if(!readNextToken() || !actualToken.getType().name().equals(TokenType.RPAREN.name()) ){
+        if (!readNextToken() || !actualToken.getType().name().equals(TokenType.RPAREN.name())) {
             printError(ParserErrors.ERROR_RPAREN.message);
         }
     }
 
     private void checkElse() {
-        if(!readNextToken() || !actualToken.getType().name().equals(TokenType.ELSE.name()) ){
+        if (!readNextToken() || !actualToken.getType().name().equals(TokenType.ELSE.name())) {
             printError(ParserErrors.ERROR_ELSE.message);
+        }
+    }
+
+    private void checkPublic() {
+        if (!readNextToken() || !actualToken.getType().name().equals(TokenType.PUBLIC.name())) {
+            printError(ParserErrors.ERROR_PUBLIC.message);
         }
     }
 
     //-------------------------------------------------------------------------------------------------------
 
     // Inputs
-    private boolean readNextToken(){
-       if (EOF) return false;
-       if (scanner.hasNext()){
-            actualToken =  bufferToken;
+    private boolean readNextToken() {
+        if (EOF) return false;
+        if (scanner.hasNext()) {
+            actualToken = bufferToken;
             scanner.getSym();
             bufferToken = scanner.getToken();
-        }else{
-           EOF = true;
-           actualToken =  bufferToken; //last buffer transfer to actual Token
+        } else {
+            EOF = true;
+            actualToken = bufferToken; //last buffer transfer to actual Token
         }
         return true;
     }
@@ -346,19 +417,24 @@ public class Parser {
     //-------------------------------------------------------------------------------------------------------
 
     // Outputs
-    private void printError(String error){
-        System.out.println( scanner.getToken().getPosition().getFilename()    + "("
-                            + scanner.getToken().getPosition().getLine()      + ","
-                            + scanner.getToken().getPosition().getColumn()    + "): "
-                            + error);
-
+    private void printError(String error) {
+        System.out.println(scanner.getToken().getPosition().getFilename() + "("
+                + scanner.getToken().getPosition().getLine() + ","
+                + scanner.getToken().getPosition().getColumn() + "): "
+                + error);
+        System.out.println("Actual token: "
+                + actualToken.getType().name() + " ["
+                + actualToken.getValue() + "]");
+        System.out.println("Buffer token: "
+                + bufferToken.getType().name() + " ["
+                + bufferToken.getValue() + "]");
         System.exit(1);
     }
 
-    private void printTest(){
-        System.out.println( scanner.getToken().getPosition().getFilename()    + "("
-                + scanner.getToken().getPosition().getLine()      + ","
-                + scanner.getToken().getPosition().getColumn()    + "): "
+    private void printTest() {
+        System.out.println(scanner.getToken().getPosition().getFilename() + "("
+                + scanner.getToken().getPosition().getLine() + ","
+                + scanner.getToken().getPosition().getColumn() + "): "
                 + scanner.getToken().getType().name());
     }
 }

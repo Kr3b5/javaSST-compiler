@@ -17,18 +17,13 @@ class HelloWorld
         x = 4;
         y = 5;
 
-        if( x <= y ){ addI(x); }
-        if( x < y ){ addI(x); }
-        if( x >= y ){ addI(y); }
-        if( x > y ){ addI(y); }
-
-        if( x == y ){ addI(1);  }
+        if( x == y ){ f = 1; }
         else{
-            addI(0);
+            f = 2;
         }
 
-        while( x != y){
-            x + 1;
+        while( x <= y){
+            f(2);
         }
 
     }
