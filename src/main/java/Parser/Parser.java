@@ -35,8 +35,6 @@ public class Parser {
         checkClass();
     }
 
-    //TODO: OPTIONAL []
-
 
     //-------------------------------------------------------------------------------------------------------
 
@@ -90,7 +88,8 @@ public class Parser {
             checkDeclaration(); // check repeating declarations
         }
         while(!(bufferToken.getType().name().equals(TokenType.RCBRACKET.name()) ||
-                bufferToken.getType().name().equals(TokenType.OTHER.name()))    ){
+                bufferToken.getType().name().equals(TokenType.OTHER.name())     ||
+                bufferToken.getType().name().equals(TokenType.EOF.name()))      ){
             checkMethodDeclaration();
             checkDeclaration(); // check repeating declarations
         }
@@ -177,19 +176,23 @@ public class Parser {
      *  Check: statement = assignment | procedure_call | if_statement | while_statement | return_statement.
      */
     private void checkStatement() {
-        readNextToken(); //read token to check statement
-        if ( actualToken.getType().name().equals(TokenType.IDENT.name()) &&
-             bufferToken.getType().name().equals(TokenType.ASSIGN.name()) ){
+        if ( bufferToken.getType().name().equals(TokenType.IDENT.name())){
+            readNextToken();
+            if ( bufferToken.getType().name().equals(TokenType.ASSIGN.name())){
                 checkAssignment();
-        }
-        else if ( actualToken.getType().name().equals(TokenType.IDENT.name()) &&
-                  bufferToken.getType().name().equals(TokenType.LPAREN.name()) ){
+            }else if (bufferToken.getType().name().equals(TokenType.LPAREN.name()) ){
                 checkProcedureCall();
-        }
-        else if (actualToken.getType().name().equals(TokenType.IF.name())) checkIfStatement();
-        else if (actualToken.getType().name().equals(TokenType.WHILE.name())) checkWhileStatement();
-        else if (actualToken.getType().name().equals(TokenType.RETURN.name())) checkReturnStatement();
-        else printError(ParserErrors.ERROR_STATEMENT.message);
+            }
+        }else if (bufferToken.getType().name().equals(TokenType.IF.name())){
+            readNextToken();        //read from buffer
+            checkIfStatement();
+        }else if (bufferToken.getType().name().equals(TokenType.WHILE.name())){
+            readNextToken();        //read from buffer
+            checkWhileStatement();
+        }else if (bufferToken.getType().name().equals(TokenType.RETURN.name())) {
+            readNextToken();        //read from buffer
+            checkReturnStatement();
+        }else printError(ParserErrors.ERROR_STATEMENT.message);
     }
 
     /**
@@ -414,6 +417,7 @@ public class Parser {
         } else {
             EOF = true;
             actualToken = bufferToken; //last buffer transfer to actual Token
+            bufferToken = scanner.getToken();
         }
         return true;
     }
