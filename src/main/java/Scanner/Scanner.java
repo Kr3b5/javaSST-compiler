@@ -216,7 +216,7 @@ public class Scanner {
 
         // ignore comment //
         if (c == '/' && input.getBuffer() == '/') {
-            while (!(c == '\n')) {
+            while (!(c == '\n' || c == 65535)) {
                 loadNext();
             }
             loadNext();
