@@ -18,7 +18,9 @@ public enum ParserErrors {
     ERROR_FACTOR                ("Ident or Number is missing!"),
 
     ERROR_EMPTY                 ("File is empty!"),
-    ERROR_EOF                   ("File not complete");
+    ERROR_EOF                   ("File not complete"),
+
+    NO_ERROR                    ("No Error found!");
 
 
 

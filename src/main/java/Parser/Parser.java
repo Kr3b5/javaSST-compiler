@@ -21,11 +21,13 @@ public class Parser {
     private Token bufferToken;
 
     private boolean EOF;
+    private boolean FAIL;
 
     public Parser(String filePath) throws FileNotFoundException {
         this.scanner = new Scanner(filePath);
         scanner.getSym();                       //read first Token in buffer
         bufferToken = scanner.getToken();
+        FAIL = false;
     }
 
     //Start parsing
@@ -63,6 +65,7 @@ public class Parser {
         checkLCBracket();
         checkDeclaration();
         checkRCBracket();
+        printSuccess();
     }
 
     /**
@@ -333,70 +336,70 @@ public class Parser {
 
     // Terminals
     private void checkIdent() {
-        if (!readNextToken() || !actualToken.getType().name().equals(TokenType.IDENT.name())) {
+        if (!bufferToken.getType().name().equals(TokenType.IDENT.name())) {
             printError(ParserErrors.ERROR_IDENT.message);
-        }
+        }else { readNextToken(); }
     }
 
     private void checkLCBracket() {
-        if (!readNextToken() || !actualToken.getType().name().equals(TokenType.LCBRACKET.name())) {
+        if (!bufferToken.getType().name().equals(TokenType.LCBRACKET.name())) {
             printError(ParserErrors.ERROR_LCBRACKET.message);
-        }
+        }else { readNextToken(); }
     }
 
     private void checkRCBracket() {
-        if (!readNextToken() || !actualToken.getType().name().equals(TokenType.RCBRACKET.name())) {
+        if (!bufferToken.getType().name().equals(TokenType.RCBRACKET.name())) {
             printError(ParserErrors.ERROR_RCBRACKET.message);
-        }
+        }else { readNextToken(); }
     }
 
     private void checkSemicolon() {
-        if (!readNextToken() || !actualToken.getType().name().equals(TokenType.SEMI.name())) {
+        if (!bufferToken.getType().name().equals(TokenType.SEMI.name())) {
             printError(ParserErrors.ERROR_SEMI.message);
-        }
+        }else { readNextToken(); }
     }
 
     private void checkAssign() {
-        if (!readNextToken() || !actualToken.getType().name().equals(TokenType.ASSIGN.name())) {
+        if (!bufferToken.getType().name().equals(TokenType.ASSIGN.name())) {
             printError(ParserErrors.ERROR_ASSIGN.message);
-        }
+        }else { readNextToken(); }
     }
 
     private void checkType() {
-        if (!readNextToken() || !actualToken.getType().name().equals(TokenType.INT.name())) {
+        if (!bufferToken.getType().name().equals(TokenType.INT.name())) {
             printError(ParserErrors.ERROR_TYPE.message);
-        }
+        }else { readNextToken(); }
     }
 
     private void checkMethodType() {
-        if (!readNextToken() || !(  actualToken.getType().name().equals(TokenType.INT.name()) ||
-                                    actualToken.getType().name().equals(TokenType.VOID.name()) ) ) {
+        if (!(  bufferToken.getType().name().equals(TokenType.INT.name()) ||
+                bufferToken.getType().name().equals(TokenType.VOID.name()) ) ) {
             printError(ParserErrors.ERROR_METHOD_TYPE.message);
-        }
+        }else { readNextToken(); }
     }
 
     private void checkLBracket() {
-        if (!readNextToken() || !actualToken.getType().name().equals(TokenType.LPAREN.name())) {
+        if (!bufferToken.getType().name().equals(TokenType.LPAREN.name())) {
             printError(ParserErrors.ERROR_LPAREN.message);
-        }
+        }else { readNextToken(); }
     }
 
     private void checkRBracket() {
-        if (!readNextToken() || !actualToken.getType().name().equals(TokenType.RPAREN.name())) {
+        if (!bufferToken.getType().name().equals(TokenType.RPAREN.name())) {
             printError(ParserErrors.ERROR_RPAREN.message);
-        }
+        }else { readNextToken(); }
     }
 
     private void checkElse() {
-        if (!readNextToken() || !actualToken.getType().name().equals(TokenType.ELSE.name())) {
+        if (!bufferToken.getType().name().equals(TokenType.ELSE.name())) {
             printError(ParserErrors.ERROR_ELSE.message);
-        }
+        }else { readNextToken(); }
     }
 
     private void checkPublic() {
-        if (!readNextToken() || !actualToken.getType().name().equals(TokenType.PUBLIC.name())) {
+        if (!bufferToken.getType().name().equals(TokenType.PUBLIC.name())) {
             printError(ParserErrors.ERROR_PUBLIC.message);
-        }
+        }else { readNextToken(); }
     }
 
     //-------------------------------------------------------------------------------------------------------
@@ -419,27 +422,33 @@ public class Parser {
 
     // Outputs
     private void printError(String error) {
-        System.out.println(scanner.getToken().getPosition().getFilename() + "("
+        logger.error(scanner.getToken().getPosition().getFilename() + "("
                 + scanner.getToken().getPosition().getLine() + ","
                 + scanner.getToken().getPosition().getColumn() + "): "
                 + error);
-        System.out.println("Actual token: "
+        logger.error("Actual token: "
                 + actualToken.getType().name() + " ["
                 + actualToken.getValue() + "]");
-        System.out.println("Buffer token: "
+        logger.error("Buffer token: "
                 + bufferToken.getType().name() + " ["
                 + bufferToken.getValue() + "]");
-        System.exit(1);
+        FAIL = true;
+        //System.exit(1);
     }
 
+    private void printSuccess() {
+        if(!FAIL) logger.info(ParserErrors.NO_ERROR.message);
+    }
+
+
     private void printTest() {
-        System.out.println(scanner.getToken().getPosition().getFilename() + "("
+        logger.debug(scanner.getToken().getPosition().getFilename() + "("
                 + scanner.getToken().getPosition().getLine() + ","
                 + scanner.getToken().getPosition().getColumn() + "): ");
-        System.out.println("Actual token: "
+        logger.debug("Actual token: "
                 + actualToken.getType().name() + " ["
                 + actualToken.getValue() + "]");
-        System.out.println("Buffer token: "
+        logger.debug("Buffer token: "
                 + bufferToken.getType().name() + " ["
                 + bufferToken.getValue() + "]");
     }

@@ -3,6 +3,7 @@
  */
 class MissingSemicolonInMethod {
     public int method() {
-        int var = 2 + 4             
+        int var;
+        var = 2 + 4
     }
 }
