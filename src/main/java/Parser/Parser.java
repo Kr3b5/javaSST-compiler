@@ -436,13 +436,13 @@ public class Parser {
         if(!FAIL) logger.info(getPrintFileInfo() + ParserErrors.NO_ERROR.message);
     }
 
-    public String getPrintFileInfo(){
+    private String getPrintFileInfo(){
         return scanner.getToken().getPosition().getFilename() + "("
                 + scanner.getToken().getPosition().getLine() + ","
                 + scanner.getToken().getPosition().getColumn() + "): ";
     }
 
-    public String getPrintTokens(){
+    private String getPrintTokens(){
         return    "Actual token: "
                 + actualToken.getType().name() + " ["
                 + actualToken.getValue() + "]"
