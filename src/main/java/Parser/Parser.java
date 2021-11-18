@@ -426,34 +426,28 @@ public class Parser {
 
     // Outputs
     private void printError(String error) {
-        logger.error(scanner.getToken().getPosition().getFilename() + "("
-                + scanner.getToken().getPosition().getLine() + ","
-                + scanner.getToken().getPosition().getColumn() + "): "
-                + error);
-        logger.error("Actual token: "
-                + actualToken.getType().name() + " ["
-                + actualToken.getValue() + "]");
-        logger.error("Buffer token: "
-                + bufferToken.getType().name() + " ["
-                + bufferToken.getValue() + "]");
+        logger.error(getPrintFileInfo() + error);
+        logger.error(getPrintFileInfo() + getPrintTokens() );
         FAIL = true;
         //System.exit(1);
     }
 
     private void printSuccess() {
-        if(!FAIL) logger.info(ParserErrors.NO_ERROR.message);
+        if(!FAIL) logger.info(getPrintFileInfo() + ParserErrors.NO_ERROR.message);
     }
 
-
-    private void printTest() {
-        logger.debug(scanner.getToken().getPosition().getFilename() + "("
+    public String getPrintFileInfo(){
+        return scanner.getToken().getPosition().getFilename() + "("
                 + scanner.getToken().getPosition().getLine() + ","
-                + scanner.getToken().getPosition().getColumn() + "): ");
-        logger.debug("Actual token: "
+                + scanner.getToken().getPosition().getColumn() + "): ";
+    }
+
+    public String getPrintTokens(){
+        return    "Actual token: "
                 + actualToken.getType().name() + " ["
-                + actualToken.getValue() + "]");
-        logger.debug("Buffer token: "
+                + actualToken.getValue() + "]"
+                + " | Buffer token: "
                 + bufferToken.getType().name() + " ["
-                + bufferToken.getValue() + "]");
+                + bufferToken.getValue() + "]";
     }
 }
