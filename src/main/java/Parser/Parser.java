@@ -435,7 +435,12 @@ public class Parser {
     private void printTest() {
         System.out.println(scanner.getToken().getPosition().getFilename() + "("
                 + scanner.getToken().getPosition().getLine() + ","
-                + scanner.getToken().getPosition().getColumn() + "): "
-                + scanner.getToken().getType().name());
+                + scanner.getToken().getPosition().getColumn() + "): ");
+        System.out.println("Actual token: "
+                + actualToken.getType().name() + " ["
+                + actualToken.getValue() + "]");
+        System.out.println("Buffer token: "
+                + bufferToken.getType().name() + " ["
+                + bufferToken.getValue() + "]");
     }
 }
