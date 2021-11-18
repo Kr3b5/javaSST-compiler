@@ -1,0 +1,12 @@
+/**
+ * Missing Bracket at if-condition
+ */
+class IfMissingBracket {
+    public void main() {
+        int a; 
+        a = 4; 
+        if a==4){
+            a = 5; 
+        }
+    }
+}

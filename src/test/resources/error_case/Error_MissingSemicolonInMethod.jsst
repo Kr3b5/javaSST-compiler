@@ -1,0 +1,8 @@
+/**
+ * Missing semicolon 
+ */
+class MissingSemicolonInMethod {
+    public int method() {
+        int var = 2 + 4             
+    }
+}

@@ -1,0 +1,8 @@
+/**
+ * Missing statement in method 
+ */
+class MissingStatement{
+    public int procedure() {
+        
+    }
+}
