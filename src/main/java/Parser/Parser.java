@@ -86,7 +86,8 @@ public class Parser {
             checkSemicolon();
             checkDeclaration(); // check repeating declarations
         }
-        while(!bufferToken.getType().name().equals(TokenType.RCBRACKET.name())) {
+        while(!(bufferToken.getType().name().equals(TokenType.RCBRACKET.name()) ||
+                bufferToken.getType().name().equals(TokenType.OTHER.name()))    ){
             checkMethodDeclaration();
             checkDeclaration(); // check repeating declarations
         }
