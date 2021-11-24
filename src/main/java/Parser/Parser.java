@@ -325,6 +325,7 @@ public class Parser {
         readNextToken();
         if (actualToken.getType().name().equals(TokenType.LPAREN.name())) {
             checkExpression();
+            checkRBracket();
         } else if ( actualToken.getType().name().equals(TokenType.IDENT.name()) &&
                     bufferToken.getType().name().equals(TokenType.LPAREN.name()) ){
             checkInternProcedureCall();
