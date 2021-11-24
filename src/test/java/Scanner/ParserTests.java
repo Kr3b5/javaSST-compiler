@@ -10,6 +10,7 @@ public class ParserTests {
     // normal cases
     private static final String COMPLETE_TEST           = "./src/test/resources/pass_test/CompleteTest.jsst";
     private static final String EMPTY_CLASS_TEST        = "./src/test/resources/pass_test/EmptyClass.jsst";
+    private static final String FSU_TEST                = "./src/test/resources/pass_test/Test.java";
 
     // error cases
     private static final String E_MISSING_BRACKET_IF    = "./src/test/resources/error_case/Error_MissingBracketIf.jsst";
@@ -25,6 +26,9 @@ public class ParserTests {
 
     @Test
     public void NormalTest_EmptyClass(){ runOverFile(EMPTY_CLASS_TEST); }
+
+    @Test
+    public void FSU_Test_complete(){ runOverFile(FSU_TEST); }
 
     // error tests
     @Test
