@@ -1,7 +1,6 @@
 package Parser;
 
-import Data.Token;
-import Data.TokenType;
+import Data.*;
 import Scanner.Scanner;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -23,11 +22,20 @@ public class Parser {
     private boolean EOF;
     private boolean FAIL;
 
+    private SymbolTable symbolTable;
+    private SymbolTable symbolTableBuffer;
+    private String ST_ID;
+    private int ST_VALUE;
+    private String ST_M_Type;
+
+
     public Parser(String filePath) throws FileNotFoundException {
         this.scanner = new Scanner(filePath);
         scanner.getSym();                       //read first Token in buffer
         bufferToken = scanner.getToken();
         FAIL = false;
+        this.symbolTable = new SymbolTable();
+        ST_ID = null;
     }
 
     //Start parsing
@@ -35,6 +43,9 @@ public class Parser {
         checkClass();
     }
 
+    public SymbolTable getSymbolTable() {
+        return symbolTable;
+    }
 
     //-------------------------------------------------------------------------------------------------------
 
@@ -47,7 +58,15 @@ public class Parser {
         if (readNextToken()) {
             if (actualToken.getType().name().equals(TokenType.CLASS.name())) {
                 checkIdent();
+
+                SymbolTable newST = new SymbolTable(symbolTable);
+                SymbolTableInsert(new STObject(ST_ID, ObjClass.CLASS,newST));
+                SymbolTable prev = symbolTable;
+                symbolTable = newST;
+
                 checkClassbody();
+
+                symbolTable = prev;
             } else {
                 printError(ParserErrors.ERROR_CLASS.message);
             }
@@ -79,12 +98,18 @@ public class Parser {
             checkAssign();
             checkExpression();
             checkSemicolon();
+
+            SymbolTableInsert(new STObject(ST_ID, ObjClass.CONST, STType.INT,ST_VALUE));
+
             checkDeclaration(); // check repeating declarations
         }
         while(bufferToken.getType().name().equals(TokenType.INT.name())) {
             readNextToken();    //read buffer to actualToken
             checkIdent();
             checkSemicolon();
+
+            SymbolTableInsert(new STObject(ST_ID, ObjClass.VAR, STType.INT));
+
             checkDeclaration(); // check repeating declarations
         }
         while(!(bufferToken.getType().name().equals(TokenType.RCBRACKET.name()) ||
@@ -101,6 +126,8 @@ public class Parser {
     private void checkMethodDeclaration() {
         checkMethodHead();
         checkMethodBody();
+
+        symbolTable = symbolTableBuffer;
     }
 
     /**
@@ -110,6 +137,16 @@ public class Parser {
             checkPublic();
             checkMethodType();
             checkIdent();
+
+            SymbolTable newST = new SymbolTable(symbolTable);
+            if(ST_M_Type.equals("VOID")){
+                SymbolTableInsert(new STObject(ST_ID, ObjClass.PROC, STType.VOID, newST));
+            }else{
+                SymbolTableInsert(new STObject(ST_ID, ObjClass.PROC, STType.INT, newST));
+            }
+            symbolTableBuffer = symbolTable;
+            symbolTable = newST;
+
             checkFormalParameters();
     }
 
@@ -136,6 +173,8 @@ public class Parser {
     private void checkFpSection() {
         checkType();
         checkIdent();
+
+        SymbolTableInsert(new STObject(ST_ID, ObjClass.PAR, STType.INT));
     }
 
     /**
@@ -157,6 +196,8 @@ public class Parser {
         checkType();
         checkIdent();
         checkSemicolon();
+
+        SymbolTableInsert(new STObject(ST_ID, ObjClass.VAR, STType.INT));
     }
 
     /**
@@ -333,6 +374,8 @@ public class Parser {
                       actualToken.getType().name().equals(TokenType.NUMBER.name())) ){
             printError(ParserErrors.ERROR_FACTOR.message);
         }
+
+        if(actualToken.getType().name().equals(TokenType.NUMBER.name())) ST_VALUE = Integer.parseInt(actualToken.getValue());
     }
 
 
@@ -342,7 +385,10 @@ public class Parser {
     private void checkIdent() {
         if (!bufferToken.getType().name().equals(TokenType.IDENT.name())) {
             printError(ParserErrors.ERROR_IDENT.message);
-        }else { readNextToken(); }
+        }else {
+            ST_ID = bufferToken.getValue();
+            readNextToken();
+        }
     }
 
     private void checkLCBracket() {
@@ -379,7 +425,12 @@ public class Parser {
         if (!(  bufferToken.getType().name().equals(TokenType.INT.name()) ||
                 bufferToken.getType().name().equals(TokenType.VOID.name()) ) ) {
             printError(ParserErrors.ERROR_METHOD_TYPE.message);
-        }else { readNextToken(); }
+        }else {
+            if(bufferToken.getType().name().equals(TokenType.INT.name())){
+                ST_M_Type = "INT";
+            }else{ ST_M_Type = "VOID"; }
+            readNextToken();
+        }
     }
 
     private void checkLBracket() {
@@ -430,7 +481,7 @@ public class Parser {
         logger.error(getPrintFileInfo() + error);
         logger.error(getPrintFileInfo() + getPrintTokens() );
         FAIL = true;
-        //System.exit(1);
+        System.exit(1);
     }
 
     private void printSuccess() {
@@ -451,4 +502,20 @@ public class Parser {
                 + bufferToken.getType().name() + " ["
                 + bufferToken.getValue() + "]";
     }
+
+    //-------------------------------------------------------------------------------------------------------
+
+    // SymbolTable Helper
+
+    private void SymbolTableInsert(STObject obj){
+        symbolTable.insert(obj);
+        resetValues();
+    }
+
+    private void resetValues(){
+        ST_VALUE = 0;
+        ST_ID = null;
+    }
+
+
 }

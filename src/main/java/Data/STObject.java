@@ -3,7 +3,7 @@ package Data;
 public class STObject {
 
     private final String name;
-    private final int objClass;
+    private final ObjClass objClass;
     private STType STType;
 
     private int intValue;
@@ -18,23 +18,21 @@ public class STObject {
     private SymbolTable symtab;
 
     //CLASS
-    public STObject(String name, int objClass, STObject varDef, STObject methodDef, SymbolTable symtab) {
+    public STObject(String name, ObjClass objClass, SymbolTable symtab) {
         this.name = name;
         this.objClass = objClass;
-        this.varDef = varDef;
-        this.methodDef = methodDef;
         this.symtab = symtab;
     }
 
     // VAR & PAR
-    public STObject(String name, int objClass, STType STType) {
+    public STObject(String name, ObjClass objClass, STType STType) {
         this.name = name;
         this.objClass = objClass;
         this.STType = STType;
     }
 
     // CONS
-    public STObject(String name, int objClass, STType STType, int intValue) {
+    public STObject(String name, ObjClass objClass, STType STType, int intValue) {
         this.name = name;
         this.objClass = objClass;
         this.STType = STType;
@@ -42,12 +40,10 @@ public class STObject {
     }
 
     // METHOD
-    public STObject(String name, int objClass, STType resultType, STObject parameterList, STObject varList, SymbolTable symtab) {
+    public STObject(String name, ObjClass objClass, STType resultType, SymbolTable symtab) {
         this.name = name;
         this.objClass = objClass;
         this.STType = resultType;
-        this.parameterList = parameterList;
-        this.varList = varList;
         this.symtab = symtab;
     }
 
@@ -67,10 +63,6 @@ public class STObject {
                 ", objClass=" + objClass +
                 ", type=" + STType +
                 ", intValue=" + intValue +
-                ", parameterListe=" + parameterList +
-                ", varListe=" + varList +
-                ", varDef=" + varDef +
-                ", methodDef=" + methodDef +
                 ", symtab=" + symtab +
                 '}';
     }
