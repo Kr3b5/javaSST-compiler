@@ -9,19 +9,24 @@ import java.io.FileNotFoundException;
 
 public class SymbolTableTest {
 
-    // normal cases
+    // files
     private static final String COMPLETE_TEST           = "./src/test/resources/pass_test/CompleteTest.jsst";
-    private static final String EMPTY_CLASS_TEST        = "./src/test/resources/pass_test/EmptyClass.jsst";
     private static final String FSU_TEST                = "./src/test/resources/pass_test/Test.java";
 
-    // normal tests
+    // tests
     @Test
     public void NormalTest_complete(){ runOverFile(COMPLETE_TEST); }
+
+    @Test
+    public void FSUTest_complete(){ runOverFile(FSU_TEST); }
 
     private void runOverFile(String path){
         try {
             Parser parser = new Parser(path);
             parser.parseFile();
+
+            System.out.println("");
+            System.out.println("------------------------------------------SYMBOLTABLE------------------------------------------");
             SymbolTable symbolTable = parser.getSymbolTable();
             //CLASS
             for (STObject Cobj : symbolTable.getObjects()) {
@@ -42,6 +47,7 @@ public class SymbolTableTest {
                     }
                 }
             }
+            System.out.println("-----------------------------------------------------------------------------------------------");
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
