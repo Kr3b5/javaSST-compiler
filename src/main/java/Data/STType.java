@@ -3,8 +3,7 @@ package Data;
 public enum STType {
 
     INT  ,
-    VOID ,
-    BOOL ;
+    VOID ;
 
     STType() {}
 }

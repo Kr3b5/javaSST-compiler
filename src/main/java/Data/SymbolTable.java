@@ -19,10 +19,6 @@ public class SymbolTable {
     }
 
 
-    public SymbolTable getEnclose() {
-        return enclose;
-    }
-
     public LinkedList<STObject> getObjects() {
         return objects;
     }
