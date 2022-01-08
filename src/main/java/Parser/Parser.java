@@ -1,11 +1,14 @@
 package Parser;
 
+import AST.*;
 import Data.*;
 import Scanner.Scanner;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.FileNotFoundException;
+import java.util.LinkedList;
+import java.util.List;
 
 public class Parser {
 
@@ -28,6 +31,14 @@ public class Parser {
     private int ST_VALUE;
     private String ST_M_Type;
 
+    private AST ast;
+    private int astID;
+    private ASTNode bufferNode;
+
+    private List<ASTNode> finalNodes;
+    private List<ASTNode> varNodes;
+    private List<ASTNode> methodNodes;
+
 
     public Parser(String filePath) throws FileNotFoundException {
         this.scanner = new Scanner(filePath);
@@ -36,6 +47,11 @@ public class Parser {
         FAIL = false;
         this.symbolTable = new SymbolTable();
         ST_ID = null;
+        astID = 1;
+
+        finalNodes = new LinkedList<ASTNode>();
+        varNodes = new LinkedList<ASTNode>();
+        methodNodes = new LinkedList<ASTNode>();
     }
 
     //Start parsing
@@ -46,6 +62,8 @@ public class Parser {
     public SymbolTable getSymbolTable() {
         return symbolTable;
     }
+
+    public AST getAst() { return ast; }
 
     //-------------------------------------------------------------------------------------------------------
 
@@ -60,11 +78,28 @@ public class Parser {
                 checkIdent();
 
                 SymbolTable newST = new SymbolTable(symbolTable);
-                SymbolTableInsert(new STObject(ST_ID, ObjClass.CLASS,newST));
+                STObject stClassObj = new STObject(ST_ID, ObjClass.CLASS,newST);
+                SymbolTableInsert(stClassObj);
                 SymbolTable prev = symbolTable;
                 symbolTable = newST;
 
+                // AST
+                ast = new AST(astID, stClassObj); astID++;
+                ASTNodeContainer nodeContainerFinal = new ASTNodeContainer(astID, "finals"); astID++;
+                ASTNodeContainer nodeContainerVars = new ASTNodeContainer(astID, "vars"); astID++;
+                ASTNodeContainer nodeContainerMethods = new ASTNodeContainer(astID, "methods"); astID++;
+
                 checkClassbody();
+
+                // add Nodecontainer to AST
+                List<ASTNodeContainer> nodeContainers = new LinkedList<ASTNodeContainer>();
+                nodeContainerFinal.setNodes(finalNodes);
+                nodeContainerVars.setNodes(varNodes);
+                nodeContainerMethods.setNodes(methodNodes);
+                nodeContainers.add(nodeContainerFinal);
+                nodeContainers.add(nodeContainerVars);
+                nodeContainers.add(nodeContainerMethods);
+                ast.setNodeContainers(nodeContainers);
 
                 symbolTable = prev;
             } else {
@@ -99,7 +134,12 @@ public class Parser {
             checkExpression();
             checkSemicolon();
 
-            SymbolTableInsert(new STObject(ST_ID, ObjClass.CONST, STType.INT,ST_VALUE));
+            STObject stFinalObj = new STObject(ST_ID, ObjClass.CONST, STType.INT,ST_VALUE);
+            ASTNode consNode = new ASTNode(astID,ST_VALUE); astID++;
+
+            SymbolTableInsert(stFinalObj);
+
+            finalNodes.add(new ASTNode(astID, consNode, stFinalObj)); astID++;
 
             checkDeclaration(); // check repeating declarations
         }
@@ -108,7 +148,10 @@ public class Parser {
             checkIdent();
             checkSemicolon();
 
-            SymbolTableInsert(new STObject(ST_ID, ObjClass.VAR, STType.INT));
+            STObject stVarObj = new STObject(ST_ID, ObjClass.VAR, STType.INT);
+            SymbolTableInsert(stVarObj);
+
+            varNodes.add(new ASTNode(astID, stVarObj));astID++;
 
             checkDeclaration(); // check repeating declarations
         }
