@@ -35,9 +35,12 @@ public class Parser {
     private int astID;
     private ASTNode bufferNode;
 
-    private List<ASTNode> finalNodes;
-    private List<ASTNode> varNodes;
-    private List<ASTNode> methodNodes;
+    private final List<ASTNode> finalNodes;
+    private final List<ASTNode> varNodes;
+    private final List<ASTNode> methodNodes;
+    private ASTNodeContainer nodeContainerFinal;
+    private ASTNodeContainer nodeContainerVars;
+    private ASTNodeContainer nodeContainerMethods;
 
 
     public Parser(String filePath) throws FileNotFoundException {
@@ -85,21 +88,11 @@ public class Parser {
 
                 // AST
                 ast = new AST(astID, stClassObj); astID++;
-                ASTNodeContainer nodeContainerFinal = new ASTNodeContainer(astID, "finals"); astID++;
-                ASTNodeContainer nodeContainerVars = new ASTNodeContainer(astID, "vars"); astID++;
-                ASTNodeContainer nodeContainerMethods = new ASTNodeContainer(astID, "methods"); astID++;
+                createContainer();
 
                 checkClassbody();
 
-                // add Nodecontainer to AST
-                List<ASTNodeContainer> nodeContainers = new LinkedList<ASTNodeContainer>();
-                nodeContainerFinal.setNodes(finalNodes);
-                nodeContainerVars.setNodes(varNodes);
-                nodeContainerMethods.setNodes(methodNodes);
-                nodeContainers.add(nodeContainerFinal);
-                nodeContainers.add(nodeContainerVars);
-                nodeContainers.add(nodeContainerMethods);
-                ast.setNodeContainers(nodeContainers);
+                mergeContainers();
 
                 symbolTable = prev;
             } else {
@@ -560,5 +553,24 @@ public class Parser {
         ST_ID = null;
     }
 
+    //-------------------------------------------------------------------------------------------------------
+    // AST Helper
+
+    private void createContainer(){
+        nodeContainerFinal = new ASTNodeContainer(astID, "finals"); astID++;
+        nodeContainerVars = new ASTNodeContainer(astID, "vars"); astID++;
+        nodeContainerMethods = new ASTNodeContainer(astID, "methods"); astID++;
+    }
+
+    private void mergeContainers(){
+        List<ASTNodeContainer> nodeContainers = new LinkedList<ASTNodeContainer>();
+        nodeContainerFinal.setNodes(finalNodes);
+        nodeContainerVars.setNodes(varNodes);
+        nodeContainerMethods.setNodes(methodNodes);
+        nodeContainers.add(nodeContainerFinal);
+        nodeContainers.add(nodeContainerVars);
+        nodeContainers.add(nodeContainerMethods);
+        ast.setNodeContainers(nodeContainers);
+    }
 
 }
