@@ -34,6 +34,7 @@ public class Parser {
     private AST ast;
     private int astID;
     private ASTNode bufferNode;
+    private ASTNode node;
 
     private final List<ASTNode> finalNodes;
     private final List<ASTNode> varNodes;
@@ -41,6 +42,8 @@ public class Parser {
     private ASTNodeContainer nodeContainerFinal;
     private ASTNodeContainer nodeContainerVars;
     private ASTNodeContainer nodeContainerMethods;
+
+    private String AST_ID;
 
 
     public Parser(String filePath) throws FileNotFoundException {
@@ -175,13 +178,19 @@ public class Parser {
             checkIdent();
 
             SymbolTable newST = new SymbolTable(symbolTable);
+            STObject stMethodObj;
             if(ST_M_Type.equals("VOID")){
-                SymbolTableInsert(new STObject(ST_ID, ObjClass.PROC, STType.VOID, newST));
+                stMethodObj = new STObject(ST_ID, ObjClass.PROC, STType.VOID, newST);
+                SymbolTableInsert(stMethodObj);
             }else{
-                SymbolTableInsert(new STObject(ST_ID, ObjClass.PROC, STType.INT, newST));
+                stMethodObj = new STObject(ST_ID, ObjClass.PROC, STType.INT, newST);
+                SymbolTableInsert(stMethodObj);
             }
             symbolTableBuffer = symbolTable;
             symbolTable = newST;
+
+            bufferNode = new ASTNode(astID, stMethodObj); astID++;
+            methodNodes.add(bufferNode);
 
             checkFormalParameters();
     }
@@ -254,6 +263,7 @@ public class Parser {
      */
     private void checkStatement() {
         if ( bufferToken.getType().name().equals(TokenType.IDENT.name())){
+            AST_ID = bufferToken.getValue();
             readNextToken();
             if ( bufferToken.getType().name().equals(TokenType.ASSIGN.name())){
                 checkAssignment();

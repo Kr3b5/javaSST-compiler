@@ -53,6 +53,18 @@ public class ASTTests {
                 }
             }
 
+            //Methods
+            ASTNodeContainer methods = nodeContainers.get(2);
+            System.out.println("  [" + methods.getID() + " : " + methods.getcName() + "]");
+
+            List<ASTNode> methodnode = methods.getNodes();
+            if(!methodnode.isEmpty()){
+                for (ASTNode node : methodnode) {
+                    System.out.println("    (" + node.getId() + " : " + node.getObject().getName() + ")");
+                }
+            }
+
+
             System.out.println("---------------------------------------------------------------------------------------");
         } catch (FileNotFoundException e) {
             e.printStackTrace();
