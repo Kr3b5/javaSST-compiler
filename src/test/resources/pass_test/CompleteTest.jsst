@@ -14,16 +14,20 @@ class HelloWorld
 
         int x;
         int y;
+
         x = 4;
         y = 5;
 
-        if( x == y ){ f = 1; }
+        if( x == y )
+        {
+            x = 1;
+        }
         else{
-            f = 2;
+            x = 2;
         }
 
         while( x <= y){
-            f(2);
+            x = addI(2);
         }
 
     }
