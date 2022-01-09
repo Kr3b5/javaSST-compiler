@@ -317,9 +317,12 @@ public class Parser {
     /**
      *  Check: intern_procedure_call = ident actual_parameters
      */
-    private void checkInternProcedureCall() {
+    private ASTNode checkInternProcedureCall() {
         // IDENT already checked in checkStatement()
+        ASTNode internProcedureNode = new ASTNode(astID++, actualToken.getValue(), ASTClass.PROD);
         checkActualParameters();
+
+        return internProcedureNode;
     }
 
     /**
@@ -479,7 +482,7 @@ public class Parser {
             checkRBracket();
         } else if ( actualToken.getType().name().equals(TokenType.IDENT.name()) &&
                     bufferToken.getType().name().equals(TokenType.LPAREN.name()) ){
-            checkInternProcedureCall();
+            factorNode = checkInternProcedureCall();
         } else if ( !(actualToken.getType().name().equals(TokenType.IDENT.name()) ||
                       actualToken.getType().name().equals(TokenType.NUMBER.name())) ){
             printError(ParserErrors.ERROR_FACTOR.message);

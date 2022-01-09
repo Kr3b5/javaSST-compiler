@@ -5,6 +5,7 @@ public enum ASTClass {
     VAR ,
     PAR ,
     BINOP,
+    PROD,
 
     ASSIGN,
     WHILE,
