@@ -34,11 +34,6 @@ public class Parser {
     private AST ast;
     private int astID;
     private ASTNode bufferNode;
-    private ASTNode node;
-
-    private ASTNode lastMainNode;
-    boolean visitmainTree;
-
 
     private final List<ASTNode> finalNodes;
     private final List<ASTNode> varNodes;
@@ -62,8 +57,6 @@ public class Parser {
         finalNodes = new LinkedList<ASTNode>();
         varNodes = new LinkedList<ASTNode>();
         methodNodes = new LinkedList<ASTNode>();
-
-        visitmainTree = true;
     }
 
     //Start parsing
@@ -307,10 +300,10 @@ public class Parser {
         ASTNode identNode = new ASTNode(astID++, AST_ID, ASTClass.VAR);
 
         checkAssign();
-        checkExpression();
+        ASTNode expressionNode = checkExpression();
         checkSemicolon();
 
-        return new ASTNode(astID++, ASTClass.ASSIGN, identNode, node);
+        return new ASTNode(astID++, ASTClass.ASSIGN, identNode, expressionNode);
     }
 
     /**
@@ -339,11 +332,10 @@ public class Parser {
         ASTNode statementSeqNode;
 
         checkLBracket();
-        checkExpression();
+        ASTNode expressionNode = checkExpression();
         checkRBracket();
 
-        ifNode.setLeft(node);
-        node = null;
+        ifNode.setLeft(expressionNode);
 
         checkLCBracket();
         statementSeqNode = checkStatementSequenz();
@@ -367,15 +359,13 @@ public class Parser {
      */
     private ASTNode checkWhileStatement() {
         // WHILE already checked in checkStatement()
-
         ASTNode whileNode = new ASTNode(astID++, ASTClass.WHILE);
 
         checkLBracket();
-        checkExpression();
+        ASTNode expressionNode = checkExpression();
         checkRBracket();
 
-        whileNode.setLeft(node);
-        node = null;
+        whileNode.setLeft(expressionNode);
 
         checkLCBracket();
         ASTNode statementSeqNode = checkStatementSequenz();
@@ -391,14 +381,14 @@ public class Parser {
      */
     private ASTNode checkReturnStatement() {
         // RETURN already checked in checkStatement()
+        ASTNode simpleExpressionNode = null;
         if ( bufferToken.getType().name().equals(TokenType.IDENT.name()) ||
              bufferToken.getType().name().equals(TokenType.NUMBER.name()) ){
-            checkSimpleExpression();
+            simpleExpressionNode = checkSimpleExpression();
         }
         checkSemicolon();
 
-        ASTNode returnNode = new ASTNode(astID++, ASTClass.RETURN, node);
-        node = null;
+        ASTNode returnNode = new ASTNode(astID++, ASTClass.RETURN, simpleExpressionNode);
         return returnNode;
     }
 
@@ -421,67 +411,71 @@ public class Parser {
     /**
      *  Check: expression = simple_expression [(“==” | “<” | ”<= ” | “>” | ”>= ”) simple_expression]
      */
-    private void checkExpression() {
-        checkSimpleExpression();
+    private ASTNode checkExpression() {
+        ASTNode simpleExpressionNode = checkSimpleExpression();
+        ASTNode ExpressionNode = simpleExpressionNode;
         if ( bufferToken.getType().name().equals(TokenType.EQUAL.name())   ||
              bufferToken.getType().name().equals(TokenType.SMALLER.name()) ||
              bufferToken.getType().name().equals(TokenType.SM_EQ.name())   ||
              bufferToken.getType().name().equals(TokenType.GREATER.name()) ||
              bufferToken.getType().name().equals(TokenType.GR_EQ.name())   ){
 
-            ASTNode ExNode = new ASTNode(astID++, node, ASTClass.BINOP, bufferToken.getType());
+            ExpressionNode = new ASTNode(astID++, simpleExpressionNode, ASTClass.BINOP, bufferToken.getType());
 
             readNextToken(); //read checked tokens from buffer
-            checkSimpleExpression();
+            simpleExpressionNode = checkSimpleExpression();
 
-            ExNode.setRight(node);
-            node = ExNode;
+            ExpressionNode.setRight(simpleExpressionNode);
         }
+        return ExpressionNode;
     }
 
     /**
      *  Check: simple_expression = term {(“+” | ”-” ) term}
      */
-    private void checkSimpleExpression() {
-        checkTerm();
+    private ASTNode checkSimpleExpression() {
+        ASTNode termNode = checkTerm();
+        ASTNode simpleExpressionNode = termNode;
         while ( bufferToken.getType().name().equals(TokenType.PLUS.name()) ||
                 bufferToken.getType().name().equals(TokenType.MINUS.name())) {
 
-            ASTNode simpleExNode = new ASTNode(astID++, node, ASTClass.BINOP, bufferToken.getType());
+            simpleExpressionNode = new ASTNode(astID++, termNode, ASTClass.BINOP, bufferToken.getType());
 
             readNextToken(); //read checked tokens from buffer
-            checkTerm();
+            termNode = checkTerm();
 
-            simpleExNode.setRight(node);
-            node = simpleExNode;
+            simpleExpressionNode.setRight(termNode);
         }
+        return simpleExpressionNode;
     }
 
     /**
      *  Check: term = factor {(“*” | ”/ “ ) factor}
      */
-    private void checkTerm() {
-        checkFactor();
+    private ASTNode checkTerm() {
+        ASTNode factorNode = checkFactor();
+        ASTNode termNode = factorNode;
         while ( bufferToken.getType().name().equals(TokenType.TIMES.name()) ||
                 bufferToken.getType().name().equals(TokenType.SLASH.name()) ){
 
-            ASTNode term =  new ASTNode(astID++, node, ASTClass.BINOP, bufferToken.getType());
+            termNode  =  new ASTNode(astID++, factorNode, ASTClass.BINOP, bufferToken.getType());
 
             readNextToken(); //read checked tokens from buffer
-            checkFactor();
+            factorNode = checkFactor();
 
-            term.setRight(node);
-            node = term;
+            termNode.setRight(factorNode);
         }
+        return termNode;
     }
 
     /**
      *  Check: factor = ident | number | “(“ expression”)” | intern_procedure_call
      */
-    private void checkFactor() {
+    private ASTNode checkFactor() {
+        ASTNode factorNode = null;
         readNextToken();
         if (actualToken.getType().name().equals(TokenType.LPAREN.name())) {
-            checkExpression();
+            factorNode = checkExpression();
             checkRBracket();
         } else if ( actualToken.getType().name().equals(TokenType.IDENT.name()) &&
                     bufferToken.getType().name().equals(TokenType.LPAREN.name()) ){
@@ -493,11 +487,12 @@ public class Parser {
 
         if(actualToken.getType().name().equals(TokenType.NUMBER.name())){
             ST_VALUE = Integer.parseInt(actualToken.getValue());
-            node = new ASTNode(astID, ST_VALUE); astID++;
+            factorNode = new ASTNode(astID++, ST_VALUE);
         }
         if(actualToken.getType().name().equals(TokenType.IDENT.name())){
-            node = new ASTNode(astID, actualToken.getValue(), ASTClass.VAR); astID++;
+            factorNode = new ASTNode(astID++, actualToken.getValue(), ASTClass.VAR);
         }
+        return factorNode;
     }
 
 
