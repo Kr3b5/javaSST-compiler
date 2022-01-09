@@ -149,8 +149,8 @@ public class ASTPrinter {
 
     private void getNextNodes(ASTNode node){
         ASTPrintObj printObj = new ASTPrintObj(node.getId(), node.getNodeClass().name());
-
-        if(node.getNodeClass().name().equals(ASTClass.INT)){
+        
+        if(node.getNodeClass().equals(ASTClass.INT)){
             printObj.setSecondline(String.valueOf(node.getConstant()));
         }else if (node.getNodeSubclass() != null ){
             printObj.setSecondline(node.getNodeSubclass().name());
