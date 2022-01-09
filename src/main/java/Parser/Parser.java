@@ -36,6 +36,10 @@ public class Parser {
     private ASTNode bufferNode;
     private ASTNode node;
 
+    private ASTNode lastMainNode;
+    boolean visitmainTree;
+
+
     private final List<ASTNode> finalNodes;
     private final List<ASTNode> varNodes;
     private final List<ASTNode> methodNodes;
@@ -58,6 +62,8 @@ public class Parser {
         finalNodes = new LinkedList<ASTNode>();
         varNodes = new LinkedList<ASTNode>();
         methodNodes = new LinkedList<ASTNode>();
+
+        visitmainTree = true;
     }
 
     //Start parsing
@@ -90,7 +96,7 @@ public class Parser {
                 symbolTable = newST;
 
                 // AST
-                ast = new AST(astID, stClassObj); astID++;
+                ast = new AST(astID++, stClassObj);
                 createContainer();
 
                 checkClassbody();
@@ -131,11 +137,11 @@ public class Parser {
             checkSemicolon();
 
             STObject stFinalObj = new STObject(ST_ID, ObjClass.CONST, STType.INT,ST_VALUE);
-            ASTNode consNode = new ASTNode(astID,ST_VALUE); astID++;
+            ASTNode consNode = new ASTNode(astID++,ST_VALUE);
 
             SymbolTableInsert(stFinalObj);
 
-            finalNodes.add(new ASTNode(astID, consNode, stFinalObj)); astID++;
+            finalNodes.add(new ASTNode(astID++, consNode, stFinalObj));
 
             checkDeclaration(); // check repeating declarations
         }
@@ -147,7 +153,7 @@ public class Parser {
             STObject stVarObj = new STObject(ST_ID, ObjClass.VAR, STType.INT);
             SymbolTableInsert(stVarObj);
 
-            varNodes.add(new ASTNode(astID, stVarObj));astID++;
+            varNodes.add(new ASTNode(astID++, stVarObj));
 
             checkDeclaration(); // check repeating declarations
         }
@@ -189,7 +195,7 @@ public class Parser {
             symbolTableBuffer = symbolTable;
             symbolTable = newST;
 
-            bufferNode = new ASTNode(astID, stMethodObj); astID++;
+            bufferNode = new ASTNode(astID++, stMethodObj);
             methodNodes.add(bufferNode);
 
             checkFormalParameters();
@@ -230,8 +236,10 @@ public class Parser {
         while ( bufferToken.getType().name().equals(TokenType.INT.name()) ){
             checkLocalDeclaration();
         }
-        checkStatementSequenz();
+        ASTNode mbNode = checkStatementSequenz();
         checkRCBracket();
+
+        bufferNode.setLink(mbNode);
     }
 
     /**
@@ -248,48 +256,61 @@ public class Parser {
     /**
      *  Check: statement_sequence = statement {statement}.
      */
-    private void checkStatementSequenz() {
-        checkStatement();
+    private ASTNode checkStatementSequenz() {
+        ASTNode last, actual, first;
+        last = checkStatement();
+        first = last;
         while ( bufferToken.getType().name().equals(TokenType.IDENT.name())  |
                 bufferToken.getType().name().equals(TokenType.IF.name())     |
                 bufferToken.getType().name().equals(TokenType.WHILE.name())  |
                 bufferToken.getType().name().equals(TokenType.RETURN.name()) ){
-            checkStatement();
+            actual = checkStatement();
+
+            last.setLink(actual);
+            last = actual;
         }
+        return first;
     }
 
     /**
      *  Check: statement = assignment | procedure_call | if_statement | while_statement | return_statement.
      */
-    private void checkStatement() {
+    private ASTNode checkStatement() {
+        ASTNode statementNode = null; ;
         if ( bufferToken.getType().name().equals(TokenType.IDENT.name())){
             AST_ID = bufferToken.getValue();
             readNextToken();
             if ( bufferToken.getType().name().equals(TokenType.ASSIGN.name())){
-                checkAssignment();
+                statementNode = checkAssignment();
             }else if (bufferToken.getType().name().equals(TokenType.LPAREN.name()) ){
                 checkProcedureCall();
             }
         }else if (bufferToken.getType().name().equals(TokenType.IF.name())){
             readNextToken();        //read from buffer
-            checkIfStatement();
+            statementNode = checkIfStatement();
         }else if (bufferToken.getType().name().equals(TokenType.WHILE.name())){
             readNextToken();        //read from buffer
-            checkWhileStatement();
+            statementNode = checkWhileStatement();
         }else if (bufferToken.getType().name().equals(TokenType.RETURN.name())) {
             readNextToken();        //read from buffer
-            checkReturnStatement();
+            statementNode = checkReturnStatement();
         }else printError(ParserErrors.ERROR_STATEMENT.message);
+
+        return statementNode;
     }
 
     /**
      *  Check: assignment = ident “=” expression “;”
      */
-    private void checkAssignment() {
+    private ASTNode checkAssignment() {
         // IDENT already checked in checkStatement()
+        ASTNode identNode = new ASTNode(astID++, AST_ID, ASTClass.VAR);
+
         checkAssign();
         checkExpression();
         checkSemicolon();
+
+        return new ASTNode(astID++, ASTClass.ASSIGN, identNode, node);
     }
 
     /**
@@ -311,43 +332,74 @@ public class Parser {
     /**
      *  Check: if_statement = “if” “(“ expression “)” “{“ statement_sequence “}” “else” “{“ statement_sequence “}”
      */
-    private void checkIfStatement() {
+    private ASTNode checkIfStatement() {
         // IF already checked in checkStatement()
+        ASTNode ifelseNode = new ASTNode(astID++, ASTClass.IF_ELSE);
+        ASTNode ifNode = new ASTNode(astID++, ASTClass.IF);
+        ASTNode statementSeqNode;
+
         checkLBracket();
         checkExpression();
         checkRBracket();
+
+        ifNode.setLeft(node);
+        node = null;
+
         checkLCBracket();
-        checkStatementSequenz();
+        statementSeqNode = checkStatementSequenz();
         checkRCBracket();
+
+        ifNode.setRight(statementSeqNode);
+        ifelseNode.setLeft(ifNode);
+
         checkElse();
         checkLCBracket();
-        checkStatementSequenz();
+        statementSeqNode = checkStatementSequenz();
         checkRCBracket();
+
+        ifelseNode.setRight(statementSeqNode);
+
+        return ifelseNode;
     }
 
     /**
      *  Check: while_statement = “while” “(“ expression “)” “{“ statement_sequence “}”
      */
-    private void checkWhileStatement() {
+    private ASTNode checkWhileStatement() {
         // WHILE already checked in checkStatement()
+
+        ASTNode whileNode = new ASTNode(astID++, ASTClass.WHILE);
+
         checkLBracket();
         checkExpression();
         checkRBracket();
+
+        whileNode.setLeft(node);
+        node = null;
+
         checkLCBracket();
-        checkStatementSequenz();
+        ASTNode statementSeqNode = checkStatementSequenz();
         checkRCBracket();
+
+        whileNode.setRight(statementSeqNode);
+
+        return whileNode;
     }
 
     /**
      *  Check: return_statement = “return” [ simple_expression ] “;”
      */
-    private void checkReturnStatement() {
+    private ASTNode checkReturnStatement() {
         // RETURN already checked in checkStatement()
         if ( bufferToken.getType().name().equals(TokenType.IDENT.name()) ||
              bufferToken.getType().name().equals(TokenType.NUMBER.name()) ){
             checkSimpleExpression();
         }
         checkSemicolon();
+
+        ASTNode returnNode = new ASTNode(astID++, ASTClass.RETURN, node);
+        node = null;
+        return returnNode;
     }
 
     /**
@@ -376,8 +428,14 @@ public class Parser {
              bufferToken.getType().name().equals(TokenType.SM_EQ.name())   ||
              bufferToken.getType().name().equals(TokenType.GREATER.name()) ||
              bufferToken.getType().name().equals(TokenType.GR_EQ.name())   ){
+
+            ASTNode ExNode = new ASTNode(astID++, node, ASTClass.BINOP, bufferToken.getType());
+
             readNextToken(); //read checked tokens from buffer
             checkSimpleExpression();
+
+            ExNode.setRight(node);
+            node = ExNode;
         }
     }
 
@@ -388,8 +446,14 @@ public class Parser {
         checkTerm();
         while ( bufferToken.getType().name().equals(TokenType.PLUS.name()) ||
                 bufferToken.getType().name().equals(TokenType.MINUS.name())) {
+
+            ASTNode simpleExNode = new ASTNode(astID++, node, ASTClass.BINOP, bufferToken.getType());
+
             readNextToken(); //read checked tokens from buffer
             checkTerm();
+
+            simpleExNode.setRight(node);
+            node = simpleExNode;
         }
     }
 
@@ -400,8 +464,14 @@ public class Parser {
         checkFactor();
         while ( bufferToken.getType().name().equals(TokenType.TIMES.name()) ||
                 bufferToken.getType().name().equals(TokenType.SLASH.name()) ){
+
+            ASTNode term =  new ASTNode(astID++, node, ASTClass.BINOP, bufferToken.getType());
+
             readNextToken(); //read checked tokens from buffer
             checkFactor();
+
+            term.setRight(node);
+            node = term;
         }
     }
 
@@ -421,7 +491,13 @@ public class Parser {
             printError(ParserErrors.ERROR_FACTOR.message);
         }
 
-        if(actualToken.getType().name().equals(TokenType.NUMBER.name())) ST_VALUE = Integer.parseInt(actualToken.getValue());
+        if(actualToken.getType().name().equals(TokenType.NUMBER.name())){
+            ST_VALUE = Integer.parseInt(actualToken.getValue());
+            node = new ASTNode(astID, ST_VALUE); astID++;
+        }
+        if(actualToken.getType().name().equals(TokenType.IDENT.name())){
+            node = new ASTNode(astID, actualToken.getValue(), ASTClass.VAR); astID++;
+        }
     }
 
 
@@ -567,9 +643,9 @@ public class Parser {
     // AST Helper
 
     private void createContainer(){
-        nodeContainerFinal = new ASTNodeContainer(astID, "finals"); astID++;
-        nodeContainerVars = new ASTNodeContainer(astID, "vars"); astID++;
-        nodeContainerMethods = new ASTNodeContainer(astID, "methods"); astID++;
+        nodeContainerFinal = new ASTNodeContainer(astID++, "finals");
+        nodeContainerVars = new ASTNodeContainer(astID++, "vars");
+        nodeContainerMethods = new ASTNodeContainer(astID++, "methods");
     }
 
     private void mergeContainers(){

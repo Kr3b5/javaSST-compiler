@@ -1,28 +1,23 @@
 package AST;
 
 import Data.STObject;
+import Data.TokenType;
 
 public class ASTNode {
 
     private int id;
+    private String name;
 
     private ASTNode left, right;
     private ASTNode link;
 
-    private short nodeClass;
-    private short nodeSubclass;
+    private ASTClass nodeClass;
+    private TokenType nodeSubclass;
 
     private STObject object;
 
     private int constant;
 
-    public ASTNode(int id, short nodeClass, short nodeSubclass, STObject object, int constant) {
-        this.id = id;
-        this.nodeClass = nodeClass;
-        this.nodeSubclass = nodeSubclass;
-        this.object = object;
-        this.constant = constant;
-    }
 
     // FinalNodes
     public ASTNode(int id, ASTNode left, STObject object) {
@@ -31,9 +26,10 @@ public class ASTNode {
         this.object = object;
     }
 
-    //ConstantNodes
+    //INTS
     public ASTNode(int id, int constant) {
         this.id = id;
+        this.nodeClass = ASTClass.INT;
         this.constant = constant;
     }
 
@@ -43,16 +39,38 @@ public class ASTNode {
         this.object = object;
     }
 
-    public void setLeft(ASTNode left) {
+    //Vars
+    public ASTNode(int id, String name, ASTClass nodeClass) {
+        this.id = id;
+        this.name = name;
+        this.nodeClass = nodeClass;
+    }
+
+    // Term
+    public ASTNode(int id, ASTNode left, ASTClass nodeClass, TokenType nodeSubclass) {
+        this.id = id;
         this.left = left;
+        this.nodeClass = nodeClass;
+        this.nodeSubclass = nodeSubclass;
     }
 
-    public void setRight(ASTNode right) {
+    public ASTNode(int id, ASTClass nodeClass) {
+        this.id = id;
+        this.nodeClass = nodeClass;
+    }
+
+    //Return
+    public ASTNode(int id, ASTClass nodeClass, ASTNode left) {
+        this.id = id;
+        this.left = left;
+        this.nodeClass = nodeClass;
+    }
+
+    public ASTNode(int id, ASTClass nodeClass, ASTNode left, ASTNode right) {
+        this.id = id;
+        this.left = left;
         this.right = right;
-    }
-
-    public void setLink(ASTNode link) {
-        this.link = link;
+        this.nodeClass = nodeClass;
     }
 
     public int getId() {
@@ -71,19 +89,35 @@ public class ASTNode {
         return link;
     }
 
-    public short getNodeClass() {
-        return nodeClass;
-    }
-
-    public short getNodeSubclass() {
-        return nodeSubclass;
-    }
-
     public STObject getObject() {
         return object;
     }
 
     public int getConstant() {
         return constant;
+    }
+
+    public void setLeft(ASTNode left) {
+        this.left = left;
+    }
+
+    public void setRight(ASTNode right) {
+        this.right = right;
+    }
+
+    public void setLink(ASTNode link) {
+        this.link = link;
+    }
+
+    public ASTClass getNodeClass() {
+        return nodeClass;
+    }
+
+    public TokenType getNodeSubclass() {
+        return nodeSubclass;
+    }
+
+    public String getName() {
+        return name;
     }
 }

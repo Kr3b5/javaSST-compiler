@@ -25,3 +25,7 @@ hs_err_pid*
 target/*
 
 src/test/java/Scanner/Tests.java
+
+*.dot
+
+*.png
