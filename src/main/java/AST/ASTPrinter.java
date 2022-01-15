@@ -81,14 +81,12 @@ public class ASTPrinter {
 
 
     private void extractNodestoList(AST ast){
-        List<ASTNodeContainer> nodeContainers = ast.getNodeContainers();
-
-        ASTNodeContainer finals = nodeContainers.get(0);
-        ASTNodeContainer vars = nodeContainers.get(1);
-        ASTNodeContainer methods = nodeContainers.get(2);
+        ASTNodeContainer finals = ast.getFinals();
+        ASTNodeContainer vars = ast.getVars();
+        ASTNodeContainer methods = ast.getMethods();
 
         //Starter Node
-        printObjs.add(new ASTPrintObj(ast.ID,  ast.getObject().getName(), null , finals.getID(), vars.getID(), methods.getID() ));
+        printObjs.add(new ASTPrintObj(ast.getID(),  ast.getObject().getName(), null , finals.getID(), vars.getID(), methods.getID() ));
         filename = ast.getObject().getName();
 
         //Container

@@ -647,14 +647,12 @@ public class Parser {
     }
 
     private void mergeContainers(){
-        List<ASTNodeContainer> nodeContainers = new LinkedList<ASTNodeContainer>();
         nodeContainerFinal.setNodes(finalNodes);
         nodeContainerVars.setNodes(varNodes);
         nodeContainerMethods.setNodes(methodNodes);
-        nodeContainers.add(nodeContainerFinal);
-        nodeContainers.add(nodeContainerVars);
-        nodeContainers.add(nodeContainerMethods);
-        ast.setNodeContainers(nodeContainers);
+        ast.setFinals(nodeContainerFinal);
+        ast.setVars(nodeContainerVars);
+        ast.setMethods(nodeContainerMethods);
     }
 
 }

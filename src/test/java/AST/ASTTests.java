@@ -10,7 +10,7 @@ public class ASTTests {
     ASTPrinter printer = new ASTPrinter();
 
     // files
-    private static final String FSU_TEST                = "./src/test/resources/pass_test/Test.java";
+    private static final String FSU_TEST            = "./src/test/resources/pass_test/Test.java";
     private static final String TEST                = "./src/test/resources/pass_test/Test2.java";
 
     @Test

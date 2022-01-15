@@ -6,18 +6,28 @@ import java.util.List;
 
 public class AST {
 
-    int ID;
-    STObject object;
+    private int ID;
+    private STObject object;
 
-    List<ASTNodeContainer> nodeContainers;
+    private ASTNodeContainer finals;
+    private ASTNodeContainer vars;
+    private ASTNodeContainer methods;
 
     public AST(int ID, STObject object) {
         this.ID = ID;
         this.object = object;
     }
 
-    public void setNodeContainers(List<ASTNodeContainer> nodeContainers) {
-        this.nodeContainers = nodeContainers;
+    public void setFinals(ASTNodeContainer finals) {
+        this.finals = finals;
+    }
+
+    public void setVars(ASTNodeContainer vars) {
+        this.vars = vars;
+    }
+
+    public void setMethods(ASTNodeContainer methods) {
+        this.methods = methods;
     }
 
     public int getID() {
@@ -28,7 +38,15 @@ public class AST {
         return object;
     }
 
-    public List<ASTNodeContainer> getNodeContainers() {
-        return nodeContainers;
+    public ASTNodeContainer getFinals() {
+        return finals;
+    }
+
+    public ASTNodeContainer getVars() {
+        return vars;
+    }
+
+    public ASTNodeContainer getMethods() {
+        return methods;
     }
 }
