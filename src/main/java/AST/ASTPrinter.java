@@ -1,5 +1,9 @@
 package AST;
 
+import Parser.Parser;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -7,6 +11,11 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class ASTPrinter {
+
+    /**
+     * The logger for this class.
+     */
+    private static final Logger logger = LogManager.getLogger(ASTPrinter.class.getName());
 
     private List<ASTPrintObj> printObjs = new LinkedList<ASTPrintObj>();
     private BufferedWriter writer;
@@ -128,21 +137,7 @@ public class ASTPrinter {
         printObjs.add(cVars);
         printObjs.add(cMethods);
 
-        for (ASTPrintObj obj : printObjs) {
-            System.out.println("[ " + obj.getID() + " | "
-                    + obj.getFirstline() + " | "
-                    + obj.getSecondline() + " | "
-                    + obj.getConLink()  + " | "
-                    + obj.getConLeft() + " | "
-                    + obj.getConRight() + "]");
-            if(!obj.getConnections().isEmpty()){
-                System.out.print("  >  Connections : ");
-                for (int z : obj.getConnections()) {
-                    System.out.print(z + " | ");
-                }
-                System.out.print("\n");
-            }
-        }
+        debugPrintObjects();
     }
 
     private void getNextNodes(ASTNode node){
@@ -172,10 +167,24 @@ public class ASTPrinter {
         printObjs.add(printObj);
     }
 
-
-
-
-
+    private void debugPrintObjects(){
+        for (ASTPrintObj obj : printObjs) {
+            logger.debug("[ " + obj.getID() + " | "
+                    + obj.getFirstline() + " | "
+                    + obj.getSecondline() + " | "
+                    + obj.getConLink()  + " | "
+                    + obj.getConLeft() + " | "
+                    + obj.getConRight() + "]");
+            if(!obj.getConnections().isEmpty()){
+                StringBuilder out = new StringBuilder(("  >  Connections : "));
+                for (int z : obj.getConnections()) {
+                    out.append(z).append(" | ");
+                }
+                out.append("\n");
+            logger.debug(out);
+            }
+        }
+    }
 
 
 }
