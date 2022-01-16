@@ -1,5 +1,6 @@
 class Test2 {
 
+    // TEST Return
     public void methVOID() {
         int m1;
         m1 = 10;
@@ -27,4 +28,44 @@ class Test2 {
         m1 = 10;
     }
 
+    // TEST IF WHILE Bool
+    public void methIF() {
+        int m1;
+        m1 = 10;
+
+        if (m1 == 15) {
+            return;
+        } else {
+            return;
+        }
+    }
+
+    public void methIFError() {
+        int m1;
+        m1 = 10;
+
+        if (15) {
+            return;
+        } else {
+            return;
+        }
+    }
+
+    public void methWHILE() {
+        int m1;
+        m1 = 10;
+
+        while(m1 < m2) {
+            m1 = m1 + 1;
+        }
+    }
+
+    public void methWHILEError() {
+        int m1;
+        m1 = 10;
+
+        while(m1) {
+            m1 = m1 + 1;
+        }
+    }
 }
