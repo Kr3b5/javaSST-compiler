@@ -56,6 +56,10 @@ public class STObject {
         return symtab;
     }
 
+    public Data.STType getSTType() {
+        return STType;
+    }
+
     @Override
     public String toString() {
         return "STObject{" +
