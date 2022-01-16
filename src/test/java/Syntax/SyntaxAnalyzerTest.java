@@ -21,7 +21,9 @@ public class SyntaxAnalyzerTest {
         Parser parser = new Parser(FSU_TEST);
         parser.parseFile();
 
-        semanticAnalyzer.analyze(parser.getAst());
+        //printer.printDot(parser.getAst());
+
+        System.out.println("Error found: " + semanticAnalyzer.analyze(parser.getAst()));
     }
 
     @Test
@@ -29,9 +31,9 @@ public class SyntaxAnalyzerTest {
         Parser parser = new Parser(TEST);
         parser.parseFile();
 
-        printer.printDot(parser.getAst());
+        //printer.printDot(parser.getAst());
 
-        semanticAnalyzer.analyze(parser.getAst());
+        System.out.println("Error found: " + semanticAnalyzer.analyze(parser.getAst()));
     }
 
 
