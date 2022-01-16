@@ -1,11 +1,6 @@
-class Test2 {
+class TestSemanticAnalyzer {
 
     // TEST Return
-    public void methVOID() {
-        int m1;
-        m1 = 10;
-    }
-
     public int methRet() {
         int m1;
         m1 = 10;
