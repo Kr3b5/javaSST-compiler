@@ -54,9 +54,9 @@ public class Parser {
         ST_ID = null;
         astID = 1;
 
-        finalNodes = new LinkedList<ASTNode>();
-        varNodes = new LinkedList<ASTNode>();
-        methodNodes = new LinkedList<ASTNode>();
+        finalNodes = new LinkedList<>();
+        varNodes = new LinkedList<>();
+        methodNodes = new LinkedList<>();
     }
 
     //Start parsing
@@ -269,7 +269,7 @@ public class Parser {
      *  Check: statement = assignment | procedure_call | if_statement | while_statement | return_statement.
      */
     private ASTNode checkStatement() {
-        ASTNode statementNode = null; ;
+        ASTNode statementNode = null;
         if ( bufferToken.getType().name().equals(TokenType.IDENT.name())){
             AST_ID = bufferToken.getValue();
             readNextToken();
@@ -391,8 +391,7 @@ public class Parser {
         }
         checkSemicolon();
 
-        ASTNode returnNode = new ASTNode(astID++, ASTClass.RETURN, simpleExpressionNode);
-        return returnNode;
+        return new ASTNode(astID++, ASTClass.RETURN, simpleExpressionNode);
     }
 
     /**
@@ -585,12 +584,11 @@ public class Parser {
         if (scanner.hasNext()) {
             actualToken = bufferToken;
             scanner.getSym();
-            bufferToken = scanner.getToken();
         } else {
             EOF = true;
             actualToken = bufferToken; //last buffer transfer to actual Token
-            bufferToken = scanner.getToken();
         }
+        bufferToken = scanner.getToken();
         return true;
     }
 
