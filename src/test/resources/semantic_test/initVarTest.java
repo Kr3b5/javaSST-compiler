@@ -16,6 +16,11 @@ class initVarTest {
         gvar1 = fvar;
     }
 
+    // OK - init in parameter
+    public void methOKinitasparameter(int pvar) {
+        gvar1 = pvar;
+    }
+
     // ERROR - not init in class or method
     public void methError() {
         mvar1 = 1;

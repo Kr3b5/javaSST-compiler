@@ -9,7 +9,7 @@ class Test {
     int dyn2;
     int dyn3;
 
-    public void meth1() {
+    public void meth1(int s) {
         int m1;
         int m2;
         int m3;

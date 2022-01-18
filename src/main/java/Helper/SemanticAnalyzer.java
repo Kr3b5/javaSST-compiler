@@ -39,7 +39,7 @@ public class SemanticAnalyzer {
             logMethod(method.getObject().getName());
 
             // get all initialized vars
-            getSTObj(st.getObjects().get(0).getSymtab(), method.getObject());
+            getInitVars(st.getObjects().get(0).getSymtab(), method.getObject());
 
             checkMethodReturn(method);
             checkallNodes(method);
@@ -173,7 +173,7 @@ public class SemanticAnalyzer {
 
     //-------------------------------------------------------------------------------------------------------
     // Helper Methods
-    private void getSTObj(SymbolTable symbolTable, STObject method){
+    private void getInitVars(SymbolTable symbolTable, STObject method){
         LinkedList<STObject> objList = new LinkedList<>();
         //finals
         for (STObject obj : symbolTable.getObjects()) {
@@ -188,23 +188,13 @@ public class SemanticAnalyzer {
             }
         }
         // vars method
-        for (STObject obj : Objects.requireNonNull(findmethodSTobj(symbolTable.getObjects(), method)).getSymtab().getObjects() ){
-            if( obj.getObjClass().equals(ObjClass.VAR) ){
+        for (STObject obj : method.getSymtab().getObjects() ){
+            if( obj.getObjClass().equals(ObjClass.VAR) || obj.getObjClass().equals(ObjClass.PAR) ){
                 objList.add(obj);
             }
         }
         checkList = objList;
     }
-
-    private STObject findmethodSTobj(LinkedList<STObject> list, STObject method){
-        for (STObject obj : list) {
-            if(obj.equals(method)){
-                return obj;
-            }
-        }
-        return null;
-    }
-
 
     private boolean findVar(String name){
         for (STObject obj : checkList) {

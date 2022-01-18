@@ -3,11 +3,19 @@ package Syntax;
 import AST.ASTPrinter;
 import Helper.SemanticAnalyzer;
 import Parser.Parser;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
 
 import java.io.FileNotFoundException;
 
 public class SyntaxAnalyzerTest {
+
+    /**
+     * The logger for this class.
+     */
+    private static final Logger logger = LogManager.getLogger(SyntaxAnalyzerTest.class.getName());
+
 
     SemanticAnalyzer semanticAnalyzer = new SemanticAnalyzer();
     ASTPrinter printer = new ASTPrinter();
@@ -26,7 +34,7 @@ public class SyntaxAnalyzerTest {
         Parser parser = new Parser(FSU_TEST);
         parser.parseFile();
         //printer.printDot(parser.getAst());
-        System.out.println("Error found: " + semanticAnalyzer.analyze(parser.getAst(), parser.getSymbolTable()));
+        logger.info("Error found: " + semanticAnalyzer.analyze(parser.getAst(), parser.getSymbolTable()));
     }
 
     @Test
@@ -36,7 +44,7 @@ public class SyntaxAnalyzerTest {
         //printer.printDot(parser.getAst());
 
         semanticAnalyzer.setDebugMode(true);
-        System.out.println("Error found: " + semanticAnalyzer.analyze(parser.getAst(), parser.getSymbolTable()));
+        logger.error("Error found: " + semanticAnalyzer.analyze(parser.getAst(), parser.getSymbolTable()));
     }
 
     @Test
@@ -46,7 +54,7 @@ public class SyntaxAnalyzerTest {
         //printer.printDot(parser.getAst());
 
         semanticAnalyzer.setDebugMode(true);
-        System.out.println("Error found: " + semanticAnalyzer.analyze(parser.getAst(), parser.getSymbolTable()));
+        logger.error("Error found: " + semanticAnalyzer.analyze(parser.getAst(), parser.getSymbolTable()));
     }
 
     @Test
@@ -56,7 +64,7 @@ public class SyntaxAnalyzerTest {
         //printer.printDot(parser.getAst());
 
         semanticAnalyzer.setDebugMode(true);
-        System.out.println("Error found: " + semanticAnalyzer.analyze(parser.getAst(), parser.getSymbolTable()));
+        logger.error("Error found: " + semanticAnalyzer.analyze(parser.getAst(), parser.getSymbolTable()));
     }
 
     @Test
@@ -66,7 +74,7 @@ public class SyntaxAnalyzerTest {
         //printer.printDot(parser.getAst());
 
         semanticAnalyzer.setDebugMode(true);
-        System.out.println("Error found: " + semanticAnalyzer.analyze(parser.getAst(), parser.getSymbolTable()));
+        logger.error("Error found: " + semanticAnalyzer.analyze(parser.getAst(), parser.getSymbolTable()));
     }
 
 }
