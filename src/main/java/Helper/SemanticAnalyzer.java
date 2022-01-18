@@ -107,8 +107,14 @@ public class SemanticAnalyzer {
             checkIfWhileCondition(node);
         }
 
+        //checkVarsInit
         if (node.getNodeClass() != null && node.getNodeClass().equals(ASTClass.VAR) ){
             checkVarInit(node);
+        }
+
+        //checkFinalgetAssign
+        if (node.getNodeClass() != null && node.getNodeClass().equals(ASTClass.ASSIGN) ){
+            checkAssignFinal(node.getLeft());
         }
 
         if (node.getLeft() != null) {
@@ -152,6 +158,18 @@ public class SemanticAnalyzer {
         }
     }
 
+    //check if Var is initialized
+    private void checkAssignFinal(ASTNode node) {
+        actualCheck = "checkAssignFinal";
+        for (STObject obj : checkList) {
+            if (obj.getName().equals(node.getName())){
+                if(obj.getObjClass().equals(ObjClass.CONST)){
+                    errorFound = true;
+                    logError( "cannot assign a value to final variable " + node.getName());
+                }
+            }
+        }
+    }
 
     //-------------------------------------------------------------------------------------------------------
     // Helper Methods

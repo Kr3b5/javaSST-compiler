@@ -18,6 +18,7 @@ public class SyntaxAnalyzerTest {
     private static final String RETURN_TEST         = "./src/test/resources/semantic_test/returnTest.java";
     private static final String IFWHILE_TEST        = "./src/test/resources/semantic_test/ifwhileBoolTest.java";
     private static final String VAR_TEST            = "./src/test/resources/semantic_test/initVarTest.java";
+    private static final String FINAL_TEST            = "./src/test/resources/semantic_test/finalAssignTest.java";
 
 
     @Test
@@ -51,6 +52,16 @@ public class SyntaxAnalyzerTest {
     @Test
     public void VAR_Test() throws FileNotFoundException {
         Parser parser = new Parser(VAR_TEST);
+        parser.parseFile();
+        //printer.printDot(parser.getAst());
+
+        semanticAnalyzer.setDebugMode(true);
+        System.out.println("Error found: " + semanticAnalyzer.analyze(parser.getAst(), parser.getSymbolTable()));
+    }
+
+    @Test
+    public void FINALASSIGN_Test() throws FileNotFoundException {
+        Parser parser = new Parser(FINAL_TEST);
         parser.parseFile();
         //printer.printDot(parser.getAst());
 
