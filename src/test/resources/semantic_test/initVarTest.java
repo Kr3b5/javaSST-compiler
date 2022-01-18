@@ -1,4 +1,7 @@
-class ifwhileBoolTest {
+class initVarTest {
+    //finals
+    final int fvar = 1;
+
     //globals
     int gvar1;
 
@@ -10,7 +13,7 @@ class ifwhileBoolTest {
 
     // OK - init in class
     public void methOKinitasglobal() {
-        gvar1 = 1;
+        gvar1 = fvar;
     }
 
     // ERROR - not init in class or method

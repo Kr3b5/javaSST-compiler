@@ -157,6 +157,12 @@ public class SemanticAnalyzer {
     // Helper Methods
     private void getSTObj(SymbolTable symbolTable, STObject method){
         LinkedList<STObject> objList = new LinkedList<>();
+        //finals
+        for (STObject obj : symbolTable.getObjects()) {
+            if( obj.getObjClass().equals(ObjClass.CONST) ){
+                objList.add(obj);
+            }
+        }
         // vars
         for (STObject obj : symbolTable.getObjects()) {
             if( obj.getObjClass().equals(ObjClass.VAR) ){
