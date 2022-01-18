@@ -60,6 +60,10 @@ public class STObject {
         return STType;
     }
 
+    public ObjClass getObjClass() {
+        return objClass;
+    }
+
     @Override
     public String toString() {
         return "STObject{" +

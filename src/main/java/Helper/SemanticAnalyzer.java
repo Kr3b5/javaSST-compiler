@@ -4,12 +4,14 @@ import AST.AST;
 import AST.ASTClass;
 import AST.ASTNode;
 import AST.ASTNodeContainer;
-import Data.STType;
-import Data.TokenType;
+import Data.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-// TODO:  [ ]  Operanden typkompatibel?
+import java.util.LinkedList;
+import java.util.Objects;
+
+// TODO:  [ ]  Operanden typkompatibel? ( ASSIGN +
 // TODO:  [X]  schleifen bzw. if:  boolescher wert?
 // TODO:  [ ]  typen der Operanden == typen der funktionsparameter ?
 // TODO:  [X]  auf jeden Pfad, über den eine Methode verlassen werden kann: gibt ein return etwas zurück? Das kann rekursiv von hinten überprüft werden.
@@ -29,19 +31,27 @@ public class SemanticAnalyzer {
     private boolean errorFound = false;
     private ASTNode bufferNode;
     private String actualCheck;
+    private LinkedList<STObject> checkList;
 
+    // DEBUG Mode
+    private boolean debugMode;
 
-    public boolean analyze(AST ast) {
+    public void setDebugMode(boolean debugMode) {
+        this.debugMode = debugMode;
+    }
 
+    public boolean analyze(AST ast , SymbolTable st) {
         ASTNodeContainer methods = ast.getMethods();
         for (ASTNode method : methods.getNodes()) {
+            //Debug
+            logMethod(method.getObject().getName());
+
+            // get all initialized vars
+            getSTObj(st.getObjects().get(0).getSymtab(), method.getObject());
 
             checkMethodReturn(method);
-
             checkallNodes(method);
-
         }
-
         return errorFound;
     }
 
@@ -97,23 +107,37 @@ public class SemanticAnalyzer {
     //-------------------------------------------------------------------------------------------------------
 
 
-    private void checkallNodes(ASTNode method) {
+    private void checkallNodes(ASTNode node) {
 
         //check IF & WHILE has bool condition
-        if (method.getNodeClass() != null && (method.getNodeClass().equals(ASTClass.IF) ||
-                method.getNodeClass().equals(ASTClass.WHILE))) {
-            checkIfWhileCondition(method);
+        if (node.getNodeClass() != null && (node.getNodeClass().equals(ASTClass.IF) ||
+                node.getNodeClass().equals(ASTClass.WHILE))) {
+            checkIfWhileCondition(node);
         }
 
+        if (node.getNodeClass() != null && node.getNodeClass().equals(ASTClass.VAR) ){
+            checkVarInit(node);
+        }
 
-        if (method.getLeft() != null) {
-            checkallNodes(method.getLeft());
+        if (node.getLeft() != null) {
+            checkallNodes(node.getLeft());
         }
-        if (method.getRight() != null) {
-            checkallNodes(method.getRight());
+        if (node.getRight() != null) {
+            checkallNodes(node.getRight());
         }
-        if (method.getLink() != null) {
-            checkallNodes(method.getLink());
+        if (node.getLink() != null) {
+            checkallNodes(node.getLink());
+        }
+    }
+
+    //check if Var is initialized
+    private void checkVarInit(ASTNode node) {
+        actualCheck = "checkVarInit";
+        if( findVar(node.getName()) ){
+            logInfo("Var " + node.getName() + " is initialized");
+        }else{
+            errorFound = true;
+            logError("Var " + node.getName() + " is not initialized!");
         }
     }
 
@@ -139,12 +163,53 @@ public class SemanticAnalyzer {
 
     //-------------------------------------------------------------------------------------------------------
     // Helper Methods
+    private void getSTObj(SymbolTable symbolTable, STObject method){
+        LinkedList<STObject> objList = new LinkedList<>();
+        // vars
+        for (STObject obj : symbolTable.getObjects()) {
+            if( obj.getObjClass().equals(ObjClass.VAR) ){
+                objList.add(obj);
+            }
+        }
+        // vars method
+        for (STObject obj : Objects.requireNonNull(findmethodSTobj(symbolTable.getObjects(), method)).getSymtab().getObjects() ){
+            if( obj.getObjClass().equals(ObjClass.VAR) ){
+                objList.add(obj);
+            }
+        }
+        checkList = objList;
+    }
+
+    private STObject findmethodSTobj(LinkedList<STObject> list, STObject method){
+        for (STObject obj : list) {
+            if(obj.equals(method)){
+                return obj;
+            }
+        }
+        return null;
+    }
+
+
+    private boolean findVar(String name){
+        for (STObject obj : checkList) {
+            if(obj.getName().equals(name)){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    //-------------------------------------------------------------------------------------------------------
+    // Log Methods
+    private void logMethod(String methodname) {
+        if(debugMode) logger.info("------------------------------------ " + methodname + " ------------------------------------");
+    }
 
     private void logError(String message) {
         logger.error("SemanticAnalyzer." + actualCheck + ": " + message);
     }
 
     private void logInfo(String message) {
-        logger.info("SemanticAnalyzer." + actualCheck + ": " + message);
+        if(debugMode) logger.info("SemanticAnalyzer." + actualCheck + ": " + message);
     }
 }
