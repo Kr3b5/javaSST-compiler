@@ -11,14 +11,6 @@ import org.apache.logging.log4j.Logger;
 import java.util.LinkedList;
 import java.util.Objects;
 
-// TODO:  [ ]  Operanden typkompatibel? ( ASSIGN +
-// TODO:  [X]  schleifen bzw. if:  boolescher wert?
-// TODO:  [ ]  typen der Operanden == typen der funktionsparameter ?
-// TODO:  [X]  auf jeden Pfad, über den eine Methode verlassen werden kann: gibt ein return etwas zurück? Das kann rekursiv von hinten überprüft werden.
-//             Die letzte Anweisung muss ein return sein oder falls die letzte Anweisung ein if ist, muss der letzte Eintrag im if und else ein return sein
-// TODO:  [ ]  Konstanten Ausdrücke ausgewertet?
-// TODO:  [ ]  lokale Variablen müssen definiert wurden, bevor sie benutzt werden
-
 
 public class SemanticAnalyzer {
 
