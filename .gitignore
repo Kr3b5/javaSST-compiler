@@ -29,3 +29,5 @@ src/test/java/Scanner/Tests.java
 *.dot
 
 *.png
+
+src/test/java/Class/Tests.java
