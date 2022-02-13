@@ -9,8 +9,22 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.LinkedList;
-import java.util.Objects;
 
+/*  TODO:   Variablen müssen Wert haben
+ *  TODO:   Konstantenfaltung
+ *  TODO:   Expression abfangen ( if bool )
+*/
+
+/**
+ *  Tests:
+ *      - ist die Variable initialisiert
+ *      - INT Methoden enden auf RETURN (IF am Ende, dann RETURN im IF und ELSE Zweig)
+ *      - FINAL Variablen dürfen nicht neu ASSIGNED werden
+ *      - WHILE benötigt BOOL Bedingung
+ *
+ *
+ *      Deadcode --> wird durch Parser abgefangen
+ */
 
 public class SemanticAnalyzer {
 
@@ -44,6 +58,7 @@ public class SemanticAnalyzer {
             checkMethodReturn(method);
             checkallNodes(method);
         }
+        logSummary();
         return errorFound;
     }
 
@@ -100,7 +115,6 @@ public class SemanticAnalyzer {
 
 
     private void checkallNodes(ASTNode node) {
-
         //check IF & WHILE has bool condition
         if (node.getNodeClass() != null && (node.getNodeClass().equals(ASTClass.IF) ||
                 node.getNodeClass().equals(ASTClass.WHILE))) {
@@ -218,4 +232,13 @@ public class SemanticAnalyzer {
     private void logInfo(String message) {
         if(debugMode) logger.info("SemanticAnalyzer." + actualCheck + ": " + message);
     }
+
+    private void logSummary() {
+        if(errorFound){
+            logger.error("SemanticAnalyzer.analyze: Error found!");
+        }else {
+            logger.info("SemanticAnalyzer.analyze: No Error found!");
+        }
+    }
+
 }
