@@ -1,6 +1,6 @@
 package Syntax;
 
-import AST.ASTPrinter;
+import AbstractSyntaxTree.ASTPrinter;
 import Helper.SemanticAnalyzer;
 import Parser.Parser;
 import org.junit.jupiter.api.Test;

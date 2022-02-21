@@ -1,4 +1,4 @@
-package AST;
+package AbstractSyntaxTree;
 
 import Data.STObject;
 import Data.TokenType;

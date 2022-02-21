@@ -1,4 +1,4 @@
-package AST;
+package AbstractSyntaxTree;
 
 import Parser.Parser;
 import org.junit.jupiter.api.Test;

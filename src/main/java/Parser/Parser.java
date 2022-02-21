@@ -1,6 +1,6 @@
 package Parser;
 
-import AST.*;
+import AbstractSyntaxTree.*;
 import Data.*;
 import Scanner.Scanner;
 import org.apache.logging.log4j.LogManager;

@@ -1,6 +1,5 @@
-package AST;
+package AbstractSyntaxTree;
 
-import Parser.Parser;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

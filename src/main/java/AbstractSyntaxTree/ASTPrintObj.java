@@ -1,4 +1,4 @@
-package AST;
+package AbstractSyntaxTree;
 
 import java.util.LinkedList;
 import java.util.List;

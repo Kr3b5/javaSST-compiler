@@ -1,4 +1,4 @@
-package AST;
+package AbstractSyntaxTree;
 
 public enum ASTClass {
 

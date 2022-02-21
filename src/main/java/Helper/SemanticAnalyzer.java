@@ -1,9 +1,9 @@
 package Helper;
 
-import AST.AST;
-import AST.ASTClass;
-import AST.ASTNode;
-import AST.ASTNodeContainer;
+import AbstractSyntaxTree.AST;
+import AbstractSyntaxTree.ASTClass;
+import AbstractSyntaxTree.ASTNode;
+import AbstractSyntaxTree.ASTNodeContainer;
 import Data.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

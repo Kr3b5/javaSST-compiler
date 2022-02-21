@@ -1,8 +1,6 @@
-package AST;
+package AbstractSyntaxTree;
 
 import Data.STObject;
-
-import java.util.List;
 
 public class AST {
 
