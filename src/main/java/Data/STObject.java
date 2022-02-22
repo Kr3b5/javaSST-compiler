@@ -64,6 +64,10 @@ public class STObject {
         return objClass;
     }
 
+    public int getIntValue() {
+        return intValue;
+    }
+
     @Override
     public String toString() {
         return "STObject{" +

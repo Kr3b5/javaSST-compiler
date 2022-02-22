@@ -1,17 +1,19 @@
 package ClassFile;
 
-import AST.AST;
+import AbstractSyntaxTree.AST;
+import ClassData.CPConstant;
 import ClassData.Field;
 import ClassData.Method;
 import Data.SymbolTable;
-import Helper.SemanticAnalyzer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
+@SuppressWarnings("FieldCanBeLocal")
 public class ClassGenerator {
 
     /**
@@ -21,17 +23,17 @@ public class ClassGenerator {
 
     // classfile
     private final int magicnumber = 0xCAFEBABE;
-    private final short major     = 59;                     // Java 8 = 52 (0x34)| Java 15 = 59 (0x3B)
-    private final short minor     = 0;
+    private final short major = 59;                     // Java 8 = 52 (0x34)| Java 15 = 59 (0x3B)
+    private final short minor = 0;
 
     private short countConstantPool;
-    private HashMap<String, Integer> constantPool;
+    private HashMap<Short, CPConstant> constantPool;
 
-    private final short accessflags   = 0; //TODO
-    private final short normalClass   = 0;
-    private final short superClass    = 0;
+    private final short accessflags = 0; //TODO
+    private final short normalClass = 0;
+    private final short superClass = 0;
 
-    private final short countInterfaces    = 0;   // Interfaces not allowed
+    private final short countInterfaces = 0;   // Interfaces not allowed
     // interface table not used
 
     private short countFields;
@@ -44,19 +46,20 @@ public class ClassGenerator {
     private List<Field> attributes;
 
     // globals
-    private AST ast;
-    private SymbolTable symbolTable;
+    private final AST ast;
+    private final SymbolTable symbolTable;
 
     private int cur;
     private byte[] code;
+    ByteBuffer buffer = ByteBuffer.allocate(100); //TODO set to 65536
 
     //constructor
     public ClassGenerator(AST ast, SymbolTable symbolTable) {
         this.ast = ast;
         this.symbolTable = symbolTable;
-        code = new byte[65536];
+        //code = new byte[65536];
         cur = 0;
-        countConstantPool = 0;
+        countConstantPool = 1;
         constantPool = new HashMap<>();
         countFields = 0;
         fields = new LinkedList<>();
@@ -67,28 +70,81 @@ public class ClassGenerator {
     }
 
 
+    public void genClass() {
+        CPGenerator cpGenerator =  new CPGenerator(ast);
+        constantPool = cpGenerator.genConstantPool();
 
-    public void genClass(){
 
+        code = genByteCode();
 
+        for (byte b : code) {
+            //if ( b != 0 )
+            System.out.format("%x ", b);
+        }
+        System.out.print('\n');
+        System.out.println(cur);
 
     }
 
+    //-----------------------------------------------------------------------------------------------------------------
 
-    void insertInteger(int cp) {
-        if (cur < 65535)
-            code[cur++] = (byte) cp;
-        else{
+    private byte[] genByteCode() {
+
+        // add magic number
+        insertInt(magicnumber);
+
+        //add major and minor
+        insertShort(major);
+        insertShort(minor);
+
+        System.out.println(constantPool.size());
+
+        //TODO Test FF
+        buffer.put((byte) 0xFF);
+        return buffer.array();
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------
+
+    void insertInt(int cp) {
+        if (cur < 65535) {
+            buffer.putInt(cp);
+            cur = cur + 4;
+        } else {
             logger.error("code overflow");
         }
     }
 
     void insertShort(short cp) {
-        if (cur < 65535)
-            code[cur++] = (byte) cp;
-        else{
+        if (cur < 65535) {
+            buffer.putShort(cp);
+            cur++;
+        } else {
             logger.error("code overflow");
         }
     }
+
+    void insertByte(byte cp) {
+        if (cur < 65535) {
+            buffer.put(cp);
+            cur++;
+        } else {
+            logger.error("code overflow");
+        }
+    }
+
+    void insertString(String s) {
+        if (cur < 65535) {
+            for (int i = 0; i < s.length(); i++) {
+                buffer.putChar(s.charAt(i));
+            }
+        } else {
+            logger.error("code overflow");
+        }
+    }
+
+
+    //-----------------------------------------------------------------------------------------------------------------
+
 
 }
