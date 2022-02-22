@@ -36,18 +36,20 @@ public class CPGenerator {
     private short classIndex;
     private short superclassIndex;
 
+    //debug
+    boolean debugMode;
+
     public CPGenerator(AST ast) {
         this.countConstantPool = 1;
         this.constantPool = new HashMap<>();
         this.ast = ast;
         this.called = new LinkedList();
+        debugMode = false;
     }
 
-    /*
-  #35 = Utf8               dyn1
-  #36 = Utf8               dyn2
-  #37 = Utf8               dyn3
-    */
+    public void setDebugMode(boolean debugMode) {
+        this.debugMode = debugMode;
+    }
 
     public CPContainer genConstantPool() {
 
@@ -61,7 +63,7 @@ public class CPGenerator {
         genPoolCodeBody();
         genPoolEnd();
 
-        printConstantPool();
+        if(debugMode) printConstantPool();
 
         CPContainer cpc = new CPContainer(constantPool, superclassIndex ,classIndex );
         return cpc;

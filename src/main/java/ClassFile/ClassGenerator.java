@@ -54,6 +54,9 @@ public class ClassGenerator {
     ByteBuffer buffer = ByteBuffer.allocate(65536); //TODO set to 65536
     private CPContainer cpc;
 
+    //debug
+    boolean debugMode;
+
     //constructor
     public ClassGenerator(AST ast, SymbolTable symbolTable) {
         this.ast = ast;
@@ -68,28 +71,27 @@ public class ClassGenerator {
         methods = new LinkedList<>();
         countAttributes = 0;
         attributes = new LinkedList<>();
+        debugMode = false;
     }
 
+    public void setDebugMode(boolean debugMode) {
+        this.debugMode = debugMode;
+    }
 
     public void genClass() {
+
+        //generate ConstantPool
         CPGenerator cpGenerator =  new CPGenerator(ast);
+        cpGenerator.setDebugMode(debugMode);
         cpc = cpGenerator.genConstantPool();
         constantPool = cpc.getConstantPool();
 
+
+
+
         code = genByteCode();
 
-
-        int i = 0;
-        for (byte b : code) {
-            if(i == 16){
-                i = 0;
-                System.out.print('\n');
-            }
-            System.out.format("%x ", b);
-            i++;
-        }
-        System.out.print('\n');
-        System.out.println(cur);
+        if(debugMode)printByteCode();
 
         writeByteCodeToFile();
     }
@@ -98,6 +100,7 @@ public class ClassGenerator {
         String filename = ast.getObject().getName() + ".class";
         try {
             FileUtils.writeByteArrayToFile(new File(filename), code);
+            logger.info("Bytecode written to file: "+ filename );
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -130,8 +133,8 @@ public class ClassGenerator {
         insertShort(countInterfaces);
 
 
-        //TODO Test FF
-        //buffer.put((byte) 0xFF);
+        logger.info("Bytecode generated!");
+
         return buffer.array();
     }
 
@@ -231,5 +234,18 @@ public class ClassGenerator {
 
     //-----------------------------------------------------------------------------------------------------------------
 
+    private void printByteCode() {
+        int i = 0;
+        for (byte b : code) {
+            if(i == 16){
+                i = 0;
+                System.out.print('\n');
+            }
+            System.out.format("%x ", b);
+            i++;
+        }
+        System.out.print('\n');
+        System.out.println(cur);
+    }
 
 }
