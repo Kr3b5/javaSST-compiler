@@ -5,6 +5,7 @@ import AbstractSyntaxTree.ASTClass;
 import AbstractSyntaxTree.ASTNode;
 import AbstractSyntaxTree.ASTNodeContainer;
 import ClassData.CPConstant;
+import ClassData.CPContainer;
 import ClassData.CPTypes;
 import Data.ObjClass;
 import Data.STObject;
@@ -33,6 +34,7 @@ public class CPGenerator {
     private final LinkedList <String> called;
 
     private short classIndex;
+    private short superclassIndex;
 
     public CPGenerator(AST ast) {
         this.countConstantPool = 1;
@@ -47,7 +49,7 @@ public class CPGenerator {
   #37 = Utf8               dyn3
     */
 
-    public HashMap<Short, CPConstant> genConstantPool() {
+    public CPContainer genConstantPool() {
 
         genPoolHead();
         genPoolClass();
@@ -60,7 +62,9 @@ public class CPGenerator {
         genPoolEnd();
 
         printConstantPool();
-        return constantPool;
+
+        CPContainer cpc = new CPContainer(constantPool, superclassIndex ,classIndex );
+        return cpc;
     }
 
     /*
@@ -73,6 +77,7 @@ public class CPGenerator {
     */
     private void genPoolHead() {
         addToPool(new CPConstant((byte) CPTypes.METHOD.value, (short) 2, (short) 3));
+        superclassIndex = countConstantPool;
         addToPool(new CPConstant((byte) CPTypes.CLASS.value, (short) 4));
         addToPool(new CPConstant((byte) CPTypes.NAMEANDTYPE.value, (short) 5, (short) 6));
         String obj = "java/lang/Object";
