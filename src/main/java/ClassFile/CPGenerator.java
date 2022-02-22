@@ -1,12 +1,14 @@
 package ClassFile;
 
-import AbstractSyntaxTree.*;
+import AbstractSyntaxTree.AST;
+import AbstractSyntaxTree.ASTClass;
+import AbstractSyntaxTree.ASTNode;
+import AbstractSyntaxTree.ASTNodeContainer;
 import ClassData.CPConstant;
 import ClassData.CPTypes;
 import Data.ObjClass;
 import Data.STObject;
 import Data.STType;
-import Data.SymbolTable;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -14,6 +16,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
+// https://docs.oracle.com/javase/specs/jvms/se15/html/jvms-4.html#jvms-4.4
 public class CPGenerator {
 
     /**
