@@ -132,6 +132,11 @@ public class ClassGenerator {
         //u2 - interfaces count
         insertShort(countInterfaces);
 
+        //TODO FIELDS
+
+        //TODO MEHTODS
+
+        //TODO ATTRIBUTES
 
         logger.info("Bytecode generated!");
 
@@ -183,14 +188,6 @@ public class ClassGenerator {
                 logger.error("Error - Type not found!");
             }
         }
-
-
-
-
-
-
-
-
     }
 
 
@@ -199,7 +196,7 @@ public class ClassGenerator {
     void insertInt(int cp) {
         if (cur < 65535) {
             buffer.putInt(cp);
-            cur = cur + 4;
+            cur += 4;
         } else {
             logger.error("code overflow");
         }
@@ -208,7 +205,7 @@ public class ClassGenerator {
     void insertShort(short cp) {
         if (cur < 65535) {
             buffer.putShort(cp);
-            cur++;
+            cur += 2;
         } else {
             logger.error("code overflow");
         }
@@ -226,6 +223,7 @@ public class ClassGenerator {
     void insertString(String s) {
         if (cur < 65535) {
             buffer.put(s.getBytes());
+            cur = cur + s.length();
         } else {
             logger.error("code overflow");
         }
