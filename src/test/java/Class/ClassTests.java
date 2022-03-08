@@ -31,7 +31,7 @@ public class ClassTests {
 
     @Test
     public void ClassTest2() throws FileNotFoundException {
-        runTest(CLASS_FILE_2, true, false);
+        runTest(CLASS_FILE_2, true, true);
     }
 
 
@@ -44,6 +44,7 @@ public class ClassTests {
         semanticAnalyzer.analyze(parser.getAst(), parser.getSymbolTable());
 
         ClassGenerator classGenerator = new ClassGenerator(parser.getAst(), parser.getSymbolTable());
+        if(DebugMode) classGenerator.setDebugMode(true);
         classGenerator.genClass();
     }
 
