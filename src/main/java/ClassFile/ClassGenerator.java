@@ -29,7 +29,9 @@ public class ClassGenerator {
     private final short major = 59;                     // Java 8 = 52 (0x34)| Java 15 = 59 (0x3B)
     private final short minor = 0;
 
-    private short countConstantPool;
+    private short this_class;
+    private short super_class;
+
     private HashMap<Short, CPConstant> constantPool;
 
     private final short accessflags = 0x0001; // Public
@@ -45,6 +47,7 @@ public class ClassGenerator {
     private short countAttributes;
     private List<Field> attributes;
 
+
     // globals
     private final AST ast;
     private final SymbolTable symbolTable;
@@ -52,7 +55,7 @@ public class ClassGenerator {
     private int cur;
     private byte[] code;
     ByteBuffer buffer = ByteBuffer.allocate(65536); //TODO set to 65536
-    private CPContainer cpc;
+    private short sourcefile;
 
     //debug
     boolean debugMode;
@@ -61,9 +64,7 @@ public class ClassGenerator {
     public ClassGenerator(AST ast, SymbolTable symbolTable) {
         this.ast = ast;
         this.symbolTable = symbolTable;
-        //code = new byte[65536];
         cur = 0;
-        countConstantPool = 1;
         constantPool = new HashMap<>();
         fields = new LinkedList<>();
         countMethods = 0;
@@ -82,17 +83,21 @@ public class ClassGenerator {
         //generate ConstantPool
         CPGenerator cpGenerator =  new CPGenerator(ast);
         cpGenerator.setDebugMode(debugMode);
-        cpc = cpGenerator.genConstantPool();
-        constantPool = cpc.getConstantPool();
-
-
-        fields = cpGenerator.getFields();
+        getCPValues(cpGenerator);
 
         code = genByteCode();
 
         if(debugMode)printByteCode();
 
         writeByteCodeToFile();
+    }
+
+    private void getCPValues(CPGenerator cpGenerator) {
+        constantPool = cpGenerator.genConstantPool();
+        this_class = cpGenerator.getClassIndex();
+        super_class = cpGenerator.getSuperclassIndex();
+        sourcefile = cpGenerator.getSourcefileIndex();
+        fields = cpGenerator.getFields();
     }
 
     private void writeByteCodeToFile() {
@@ -125,9 +130,9 @@ public class ClassGenerator {
         //u2 - access_flags;
         insertShort(accessflags);
         //u2 - this_class;
-        insertShort(cpc.getThis_class());
+        insertShort(this_class);
         //u2 - super_class;
-        insertShort(cpc.getSuper_class());
+        insertShort(super_class);
 
         //u2 - interfaces count
         insertShort(countInterfaces);
@@ -225,9 +230,9 @@ public class ClassGenerator {
     */
     private void insertAttributes() {               //TODO
         insertShort((short) 1);
-        insertShort(cpc.getSourcefile());
+        insertShort(sourcefile);
         insertInt(2);
-        insertShort((short)(cpc.getSourcefile() + 1));
+        insertShort((short)(sourcefile + 1));
     }
 
 

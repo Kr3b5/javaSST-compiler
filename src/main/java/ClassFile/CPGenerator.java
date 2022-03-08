@@ -49,15 +49,20 @@ public class CPGenerator {
         debugMode = false;
     }
 
+    //SETTER + GETTER
     public void setDebugMode(boolean debugMode) {
         this.debugMode = debugMode;
     }
 
-    public LinkedList<Field> getFields() {
-        return fields;
-    }
+    public LinkedList<Field> getFields() { return fields; }
+    public short getClassIndex() { return classIndex; }
+    public short getSuperclassIndex() { return superclassIndex; }
+    public short getSourcefileIndex() { return sourcefileIndex; }
 
-    public CPContainer genConstantPool() {
+
+    // METHODS
+
+    public HashMap<Short, CPConstant> genConstantPool() {
 
         genPoolHead();
         genPoolClass();
@@ -72,8 +77,7 @@ public class CPGenerator {
         if(debugMode) printConstantPool();
 
         //TODO getter instead of Container;
-        CPContainer cpc = new CPContainer(constantPool, superclassIndex ,classIndex, sourcefileIndex);
-        return cpc;
+        return constantPool;
     }
 
     /*
