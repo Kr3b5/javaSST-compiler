@@ -37,4 +37,24 @@ public abstract class Entry {
     public List<Attribut> getAttributes() {
         return attributes;
     }
+
+    public void setAccessFlag(short accessFlag) {
+        this.accessFlag = accessFlag;
+    }
+
+    public void setNameIndex(short nameIndex) {
+        this.nameIndex = nameIndex;
+    }
+
+    public void setSignatureIndex(short signatureIndex) {
+        this.signatureIndex = signatureIndex;
+    }
+
+    public void setCountAttributes(short countAttributes) {
+        this.countAttributes = countAttributes;
+    }
+
+    public void setAttributes(List<Attribut> attributes) {
+        this.attributes = attributes;
+    }
 }

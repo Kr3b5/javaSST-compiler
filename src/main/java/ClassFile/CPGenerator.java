@@ -4,9 +4,7 @@ import AbstractSyntaxTree.AST;
 import AbstractSyntaxTree.ASTClass;
 import AbstractSyntaxTree.ASTNode;
 import AbstractSyntaxTree.ASTNodeContainer;
-import ClassData.CPConstant;
-import ClassData.CPContainer;
-import ClassData.CPTypes;
+import ClassData.*;
 import Data.ObjClass;
 import Data.STObject;
 import Data.STType;
@@ -15,6 +13,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 // https://docs.oracle.com/javase/specs/jvms/se15/html/jvms-4.html#jvms-4.4
@@ -28,6 +27,7 @@ public class CPGenerator {
 
     private short countConstantPool;
     private final HashMap<Short, CPConstant> constantPool;
+    private final LinkedList<Field> fields;
 
     private AST ast;
 
@@ -43,6 +43,7 @@ public class CPGenerator {
     public CPGenerator(AST ast) {
         this.countConstantPool = 1;
         this.constantPool = new HashMap<>();
+        this.fields = new LinkedList();
         this.ast = ast;
         this.called = new LinkedList();
         debugMode = false;
@@ -50,6 +51,10 @@ public class CPGenerator {
 
     public void setDebugMode(boolean debugMode) {
         this.debugMode = debugMode;
+    }
+
+    public LinkedList<Field> getFields() {
+        return fields;
     }
 
     public CPContainer genConstantPool() {
@@ -66,6 +71,7 @@ public class CPGenerator {
 
         if(debugMode) printConstantPool();
 
+        //TODO getter instead of Container;
         CPContainer cpc = new CPContainer(constantPool, superclassIndex ,classIndex, sourcefileIndex);
         return cpc;
     }
@@ -110,17 +116,26 @@ public class CPGenerator {
     private void genPoolFinals() {
         ASTNodeContainer finals = ast.getFinals();
         for (ASTNode node : finals.getNodes()) {
+            short nameIndex = 0;
             STObject stobject = node.getObject();
             addToPool(new CPConstant((byte) CPTypes.FIELD.value, classIndex , (short) (countConstantPool + 1)));
             short key = getKeyByStringValue("I");
             if( key != 0){
                 addToPool(new CPConstant((byte) CPTypes.NAMEANDTYPE.value, (short) (countConstantPool + 1), (short) key ));
+                nameIndex = countConstantPool;
                 addToPool(new CPConstant((byte) CPTypes.UTF8.value, (short) stobject.getName().length(), stobject.getName()));
             }else{
                 addToPool(new CPConstant((byte) CPTypes.NAMEANDTYPE.value, (short) (countConstantPool + 1), (short) (countConstantPool + 2)));
+                nameIndex = countConstantPool;
                 addToPool(new CPConstant((byte) CPTypes.UTF8.value, (short) stobject.getName().length(), stobject.getName()));
+                key = countConstantPool;
                 addToPool(new CPConstant((byte) CPTypes.UTF8.value, (short)1, "I"));
             }
+
+            // add Fields to Fieldlist
+            // ACC_FINAL 0x0010
+            Field field = new Field((short)0x10, nameIndex, key, (short) 0, null);
+            fields.add(field);
         }
     }
 
@@ -162,16 +177,24 @@ public class CPGenerator {
         for (ASTNode n : globals.getNodes()) {
             if(called.contains(n.getObject().getName())){
                 short key = getKeyByStringValue("I");
+                short nameIndex = 0;
                 if( key != 0){
                     addToPool(new CPConstant((byte) CPTypes.FIELD.value, classIndex , (short) (countConstantPool + 1)));
                     addToPool(new CPConstant((byte) CPTypes.NAMEANDTYPE.value, (short) (countConstantPool + 1), key));
+                    nameIndex = countConstantPool;
                     addToPool(new CPConstant((byte) CPTypes.UTF8.value, (short) n.getObject().getName().length(), n.getObject().getName()));
                 }else{
                     addToPool(new CPConstant((byte) CPTypes.FIELD.value, classIndex , (short) (countConstantPool + 1)));
                     addToPool(new CPConstant((byte) CPTypes.NAMEANDTYPE.value, (short) (countConstantPool + 1), (short) (countConstantPool + 2)));
+                    nameIndex = countConstantPool;
                     addToPool(new CPConstant((byte) CPTypes.UTF8.value, (short) n.getObject().getName().length(), n.getObject().getName()));
+                    key = countConstantPool;
                     addToPool(new CPConstant((byte) CPTypes.UTF8.value, (short)1, "I"));
                 }
+
+                // add Globals to Fieldlist
+                Field field = new Field((short)0, nameIndex, key, (short) 0, null);
+                fields.add(field);
             }
         }
     }
@@ -205,10 +228,19 @@ public class CPGenerator {
         ASTNodeContainer finals = ast.getFinals();
         if( !finals.getNodes().isEmpty()){
             String c = "ConstantValue";
+            short constantValueIndex = countConstantPool;
+            int i = 0;
             addToPool(new CPConstant((byte) CPTypes.UTF8.value, (short) c.length(), c));
             for (ASTNode node : finals.getNodes()) {
                 STObject stobject = node.getObject();
+                Attribut constantValue = new Attribut(constantValueIndex, 2, countConstantPool);
                 addToPool(new CPConstant((byte) CPTypes.INTEGER.value, stobject.getIntValue()));
+
+                fields.get(i).setCountAttributes((short)1);
+                List attributes = new LinkedList<Attribut>();
+                attributes.add(constantValue);
+                fields.get(i).setAttributes(attributes);
+                i++;
             }
         }
     }
@@ -217,6 +249,10 @@ public class CPGenerator {
         ASTNodeContainer globals = ast.getVars();
         for (ASTNode n : globals.getNodes()) {
             if(!called.contains(n.getObject().getName())){
+                // add Globals to Fieldlist
+                Field field = new Field((short)0, countConstantPool, getKeyByStringValue("I"), (short) 0, null);
+                fields.add(field);
+
                 addToPool(new CPConstant((byte) CPTypes.UTF8.value, (short) n.getObject().getName().length(), n.getObject().getName()));
             }
         }

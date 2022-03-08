@@ -37,7 +37,6 @@ public class ClassGenerator {
     private final short countInterfaces = 0;   // Interfaces not allowed
     // interface table not used
 
-    private short countFields;
     private List<Field> fields;
 
     private short countMethods;
@@ -66,7 +65,6 @@ public class ClassGenerator {
         cur = 0;
         countConstantPool = 1;
         constantPool = new HashMap<>();
-        countFields = 0;
         fields = new LinkedList<>();
         countMethods = 0;
         methods = new LinkedList<>();
@@ -88,7 +86,7 @@ public class ClassGenerator {
         constantPool = cpc.getConstantPool();
 
 
-
+        fields = cpGenerator.getFields();
 
         code = genByteCode();
 
@@ -135,7 +133,8 @@ public class ClassGenerator {
         insertShort(countInterfaces);
 
         //TODO FIELDS
-        insertShort((short)0); //TODO
+        insertShort((short)fields.size()); //TODO
+        insertFields();
 
         //TODO MEHTODS
         insertShort((short)0); //TODO
@@ -195,14 +194,36 @@ public class ClassGenerator {
         }
     }
 
-    // TODO
-    /*
+    /*  https://docs.oracle.com/javase/specs/jvms/se15/html/jvms-4.html#jvms-4.5
+        u2             access_flags;
+        u2             name_index;
+        u2             descriptor_index;
+        u2             attributes_count;
+        attribute_info attributes[attributes_count];
+    */
+    private void insertFields() {
+        for (Field f : fields) {
+            insertShort(f.getAccessFlag());
+            insertShort(f.getNameIndex());
+            insertShort(f.getSignatureIndex());
+            insertShort(f.getCountAttributes());
+            if(f.getAttributes() != null){
+                for (Attribut a : f.getAttributes()) {
+                    insertShort(a.getNameIndex());
+                    insertInt(a.getLength());
+                    insertShort(a.getIndex());
+                }
+            }
+        }
+    }
+
+    /*  https://docs.oracle.com/javase/specs/jvms/se15/html/jvms-4.html#jvms-4.7
         u2 attributes_count
         u2 attribute_name_index
         u4 attribute_length
         u2 sourcefile
     */
-    private void insertAttributes() {
+    private void insertAttributes() {               //TODO
         insertShort((short) 1);
         insertShort(cpc.getSourcefile());
         insertInt(2);
