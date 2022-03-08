@@ -113,10 +113,11 @@ public class ClassGenerator {
         //u4 - add magic number
         insertInt(magicnumber);
 
-        //u2 - major
-        insertShort(major);
         //u2 - minor
         insertShort(minor);
+        //u2 - major
+        insertShort(major);
+
 
         //u2 - constant_pool_count +  constant_pool
         insertShort((short)(constantPool.size() + 1));
