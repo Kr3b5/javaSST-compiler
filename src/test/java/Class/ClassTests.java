@@ -21,30 +21,30 @@ public class ClassTests {
 
     @Test
     public void FSUTest_complete() throws FileNotFoundException {
-        runTest(FSU_TEST, false, false);
+        runTest(FSU_TEST, false, false, true);
     }
 
     @Test
     public void ClassTest1() throws FileNotFoundException {
-        runTest(CLASS_FILE_1, true, false);
+        runTest(CLASS_FILE_1, true, false, false);
     }
 
     @Test
     public void ClassTest2() throws FileNotFoundException {
-        runTest(CLASS_FILE_2, true, true);
+        runTest(CLASS_FILE_2, true, true, true);
     }
 
 
-    private void runTest(String filePath, Boolean printAST, Boolean DebugMode) throws FileNotFoundException {
+    private void runTest(String filePath, Boolean printAST, Boolean DebugModeSA, Boolean DebugModeCF) throws FileNotFoundException {
         Parser parser = new Parser(filePath);
         parser.parseFile();
         if(printAST) printer.printDot(parser.getAst());
 
-        if(DebugMode) semanticAnalyzer.setDebugMode(true);
+        if(DebugModeSA) semanticAnalyzer.setDebugMode(true);
         semanticAnalyzer.analyze(parser.getAst(), parser.getSymbolTable());
 
         ClassGenerator classGenerator = new ClassGenerator(parser.getAst(), parser.getSymbolTable());
-        if(DebugMode) classGenerator.setDebugMode(true);
+        if(DebugModeCF) classGenerator.setDebugMode(true);
         classGenerator.genClass();
     }
 
