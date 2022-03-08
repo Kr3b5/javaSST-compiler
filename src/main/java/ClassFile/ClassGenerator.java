@@ -8,12 +8,13 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+
+// https://docs.oracle.com/javase/specs/jvms/se15/html/jvms-4.html
 
 @SuppressWarnings("FieldCanBeLocal")
 public class ClassGenerator {
@@ -134,10 +135,13 @@ public class ClassGenerator {
         insertShort(countInterfaces);
 
         //TODO FIELDS
+        insertShort((short)0); //TODO
 
         //TODO MEHTODS
+        insertShort((short)0); //TODO
 
-        //TODO ATTRIBUTES
+        //ATTRIBUTES
+        insertAttributes();
 
         logger.info("Bytecode generated!");
 
@@ -189,6 +193,20 @@ public class ClassGenerator {
                 logger.error("Error - Type not found!");
             }
         }
+    }
+
+    // TODO
+    /*
+        u2 attributes_count
+        u2 attribute_name_index
+        u4 attribute_length
+        u2 sourcefile
+    */
+    private void insertAttributes() {
+        insertShort((short) 1);
+        insertShort(cpc.getSourcefile());
+        insertInt(2);
+        insertShort((short)(cpc.getSourcefile() + 1));
     }
 
 

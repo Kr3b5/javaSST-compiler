@@ -35,6 +35,7 @@ public class CPGenerator {
 
     private short classIndex;
     private short superclassIndex;
+    private short sourcefileIndex;
 
     //debug
     boolean debugMode;
@@ -65,7 +66,7 @@ public class CPGenerator {
 
         if(debugMode) printConstantPool();
 
-        CPContainer cpc = new CPContainer(constantPool, superclassIndex ,classIndex );
+        CPContainer cpc = new CPContainer(constantPool, superclassIndex ,classIndex, sourcefileIndex);
         return cpc;
     }
 
@@ -258,6 +259,7 @@ public class CPGenerator {
     private void genPoolEnd() {
         String sf = "SourceFile";
         String name = ast.getObject().getName() + ".java";
+        sourcefileIndex = countConstantPool;
         addToPool(new CPConstant((byte) CPTypes.UTF8.value, (short) sf.length(), sf));
         addToPool(new CPConstant((byte) CPTypes.UTF8.value, (short) name.length(), name));
     }
