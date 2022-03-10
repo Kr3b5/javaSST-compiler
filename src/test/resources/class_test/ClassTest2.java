@@ -33,11 +33,11 @@ class ClassTest2 {
 
     public int methif(int m) {
         if (m >= 9) {
-            return m;
+            m = m - 5;
         } else {
-            m = m - 6;
-            return m;
+            m = m - 2;
         }
+        return m;
     }
 
     public int methwhile(int m) {
