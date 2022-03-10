@@ -13,6 +13,7 @@ public class CPConstant {
         this.type = type;
         this.bytefield1 = bytefield1;
         this.bytefield2 = bytefield2;
+        iValue = -1;
     }
 
     //UTF-8
@@ -20,6 +21,7 @@ public class CPConstant {
         this.type = type;
         this.bytefield1 = bytefield1;
         this.sValue = sValue;
+        iValue = -1;
     }
 
     //Integer
@@ -32,6 +34,7 @@ public class CPConstant {
     public CPConstant(byte type, short bytefield1) {
         this.type = type;
         this.bytefield1 = bytefield1;
+        iValue = -1;
     }
 
     public byte getType() {

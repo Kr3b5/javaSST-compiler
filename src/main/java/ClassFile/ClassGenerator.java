@@ -41,10 +41,8 @@ public class ClassGenerator {
 
     private List<Field> fields;
 
-    private short countMethods;
     private List<Method> methods;
 
-    private short countAttributes;
     private List<Field> attributes;
 
 
@@ -52,9 +50,8 @@ public class ClassGenerator {
     private final AST ast;
     private final SymbolTable symbolTable;
 
-    private int cur;
     private byte[] code;
-    ByteBuffer buffer = ByteBuffer.allocate(65536); //TODO set to 65536
+    ByteBuffer buffer = ByteBuffer.allocate(65536); //TODO
     private short sourcefile;
 
     //debug
@@ -64,12 +61,9 @@ public class ClassGenerator {
     public ClassGenerator(AST ast, SymbolTable symbolTable) {
         this.ast = ast;
         this.symbolTable = symbolTable;
-        cur = 0;
         constantPool = new HashMap<>();
         fields = new LinkedList<>();
-        countMethods = 0;
         methods = new LinkedList<>();
-        countAttributes = 0;
         attributes = new LinkedList<>();
         debugMode = false;
     }
@@ -83,6 +77,7 @@ public class ClassGenerator {
         //generate ConstantPool
         CPGenerator cpGenerator =  new CPGenerator(ast);
         cpGenerator.setDebugMode(debugMode);
+        cpGenerator.generate();
         getCPValues(cpGenerator);
 
         code = genByteCode();
@@ -93,11 +88,12 @@ public class ClassGenerator {
     }
 
     private void getCPValues(CPGenerator cpGenerator) {
-        constantPool = cpGenerator.genConstantPool();
+        constantPool = cpGenerator.getConstantPool();
         this_class = cpGenerator.getClassIndex();
         super_class = cpGenerator.getSuperclassIndex();
         sourcefile = cpGenerator.getSourcefileIndex();
         fields = cpGenerator.getFields();
+        methods = cpGenerator.getMethods();
     }
 
     private void writeByteCodeToFile() {
@@ -137,12 +133,11 @@ public class ClassGenerator {
         //u2 - interfaces count
         insertShort(countInterfaces);
 
-        //TODO FIELDS
-        insertShort((short)fields.size()); //TODO
+        insertShort((short)fields.size());
         insertFields();
 
-        //TODO MEHTODS
-        insertShort((short)0); //TODO
+        insertShort((short)methods.size());
+        insertMethods();
 
         //ATTRIBUTES
         insertAttributes();
@@ -222,6 +217,76 @@ public class ClassGenerator {
         }
     }
 
+     /* https://docs.oracle.com/javase/specs/jvms/se15/html/jvms-4.html#jvms-4.6
+        u2             access_flags;
+        u2             name_index;
+        u2             descriptor_index;
+        u2             attributes_count;
+        attribute_info attributes[attributes_count];
+    */
+    private void insertMethods() {
+        for (Method m : methods) {
+            insertShort(m.getAccessFlag());
+            insertShort(m.getNameIndex());
+            insertShort(m.getSignatureIndex());
+            insertShort(m.getCountAttributes());
+
+
+            if(m.getAttributes() != null ){
+                /* https://docs.oracle.com/javase/specs/jvms/se15/html/jvms-4.html#jvms-4.7.3
+                    u2 attribute_name_index;
+                    u4 attribute_length;
+                    u2 max_stack;
+                    u2 max_locals;
+                    u4 code_length;
+                    u1 code[code_length];
+                    u2 exception_table_length;
+                    u2 attributes_count;
+                    attribute_info attributes[attributes_count];
+                */
+                for (Attribut codeAtt : m.getAttributes()) {
+                    insertShort(codeAtt.getNameIndex());
+                    insertInt(codeAtt.getLength());
+                    insertShort(codeAtt.getStackSize());
+                    insertShort(codeAtt.getCountLocalVars());
+                    insertInt(codeAtt.getCodeLength());
+                    insertByteArray(codeAtt.getCode());
+                    insertShort(codeAtt.getCountExceptionTable());
+                    insertShort(codeAtt.getCountAttributes());
+
+                    if(codeAtt.getAttributes() != null ){
+                        /* https://docs.oracle.com/javase/specs/jvms/se15/html/jvms-4.html#jvms-4.7.12
+                            u2 attribute_name_index;
+                            u4 attribute_length;
+                            u2 line_number_table_length;
+                            {   u2 start_pc;
+                                u2 line_number;
+                            } line_number_table[line_number_table_length];
+                        */
+                        for (Attribut attribut: codeAtt.getAttributes()) {
+                            insertShort(attribut.getNameIndex());
+                            insertInt(attribut.getLength());
+                            insertShort(attribut.getCountAttributes());
+
+                            if(attribut.getAttributes() != null ) {
+                                /* https://docs.oracle.com/javase/specs/jvms/se15/html/jvms-4.html#jvms-4.7.12
+                                    u2 start_pc;
+                                    u2 line_number;
+                                */
+                                for (Attribut lnt : attribut.getAttributes()) {
+                                    insertShort(lnt.getStart_pc());
+                                    insertShort(lnt.getLine_number());
+                                }
+                            }
+                        }
+                    }
+
+                }
+            }
+        }
+    }
+
+
     /*  https://docs.oracle.com/javase/specs/jvms/se15/html/jvms-4.html#jvms-4.7
         u2 attributes_count
         u2 attribute_name_index
@@ -239,39 +304,23 @@ public class ClassGenerator {
     //-----------------------------------------------------------------------------------------------------------------
 
     void insertInt(int cp) {
-        if (cur < 65535) {
-            buffer.putInt(cp);
-            cur += 4;
-        } else {
-            logger.error("code overflow");
-        }
+        buffer.putInt(cp);
     }
 
     void insertShort(short cp) {
-        if (cur < 65535) {
-            buffer.putShort(cp);
-            cur += 2;
-        } else {
-            logger.error("code overflow");
-        }
+        buffer.putShort(cp);
     }
 
     void insertByte(byte cp) {
-        if (cur < 65535) {
-            buffer.put(cp);
-            cur++;
-        } else {
-            logger.error("code overflow");
-        }
+        buffer.put(cp);
+    }
+
+    void insertByteArray(byte[] cp) {
+        buffer.put(cp);
     }
 
     void insertString(String s) {
-        if (cur < 65535) {
-            buffer.put(s.getBytes());
-            cur = cur + s.length();
-        } else {
-            logger.error("code overflow");
-        }
+        buffer.put(s.getBytes());
     }
 
 
@@ -288,7 +337,6 @@ public class ClassGenerator {
             i++;
         }
         System.out.print('\n');
-        System.out.println(cur);
     }
 
 }

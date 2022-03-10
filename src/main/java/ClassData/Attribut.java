@@ -18,6 +18,9 @@ public class Attribut {
     private short countAttributes;
     private List<Attribut> attributes;
 
+    private short start_pc;
+    private short line_number;
+
 
     // Class + Fields
     public Attribut(short nameIndex, int length, short index) {
@@ -38,12 +41,19 @@ public class Attribut {
         this.attributes = attributes;
     }
 
+    //LinenumberTable
+    public Attribut(short nameIndex, int length, short countAttributes, List<Attribut> attributes) {
+        this.nameIndex = nameIndex;
+        this.length = length;
+        this.countAttributes = countAttributes;
+        this.attributes = attributes;
+    }
 
-
-
-
-
-
+    //LineNumberTableAttr
+    public Attribut(short start_pc, short line_number) {
+        this.start_pc = start_pc;
+        this.line_number = line_number;
+    }
 
     // GETTER
 
@@ -85,6 +95,14 @@ public class Attribut {
 
     public List<Attribut> getAttributes() {
         return attributes;
+    }
+
+    public short getStart_pc() {
+        return start_pc;
+    }
+
+    public short getLine_number() {
+        return line_number;
     }
 
 }

@@ -11,6 +11,7 @@ import Data.STType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -28,14 +29,22 @@ public class CPGenerator {
     private short countConstantPool;
     private final HashMap<Short, CPConstant> constantPool;
     private final LinkedList<Field> fields;
+    private final LinkedList<Method> methods;
 
-    private AST ast;
+    private final AST ast;
 
-    private final LinkedList <String> called;
+    private final List<String> called;
 
     private short classIndex;
     private short superclassIndex;
     private short sourcefileIndex;
+    private short codeIndex;
+    private short lntIndex;
+
+    private final ByteBuffer codeBuffer = ByteBuffer.allocate(65536);
+    private int cur;
+
+    List<Short> field_ref;
 
     //debug
     boolean debugMode;
@@ -43,9 +52,10 @@ public class CPGenerator {
     public CPGenerator(AST ast) {
         this.countConstantPool = 1;
         this.constantPool = new HashMap<>();
-        this.fields = new LinkedList();
+        this.fields = new LinkedList<>();
+        this.methods = new LinkedList<>();
         this.ast = ast;
-        this.called = new LinkedList();
+        this.called = new LinkedList<>();
         debugMode = false;
     }
 
@@ -55,15 +65,21 @@ public class CPGenerator {
     }
 
     public LinkedList<Field> getFields() { return fields; }
+    public LinkedList<Method> getMethods() { return methods; }
     public short getClassIndex() { return classIndex; }
     public short getSuperclassIndex() { return superclassIndex; }
     public short getSourcefileIndex() { return sourcefileIndex; }
-
-
+    public HashMap<Short, CPConstant> getConstantPool() { return constantPool;}
     // METHODS
 
-    public HashMap<Short, CPConstant> genConstantPool() {
+    public void generate(){
+        genConstantPool();
+        genCode();
+    }
 
+
+
+    public void genConstantPool() {
         genPoolHead();
         genPoolClass();
         genPoolFinals();
@@ -75,9 +91,6 @@ public class CPGenerator {
         genPoolEnd();
 
         if(debugMode) printConstantPool();
-
-        //TODO getter instead of Container;
-        return constantPool;
     }
 
     /*
@@ -108,6 +121,7 @@ public class CPGenerator {
     private void genPoolClass() {
         classIndex = countConstantPool;
         addToPool(new CPConstant((byte) CPTypes.CLASS.value, (short) (countConstantPool + 1)));
+        methods.add(new Method((short)0, countConstantPool, (short) 6, (short) 0, null));
         addToPool(new CPConstant((byte) CPTypes.UTF8.value, (short) ast.getObject().getName().length(), ast.getObject().getName()));
     }
 
@@ -118,10 +132,13 @@ public class CPGenerator {
         #12 = Utf8               I
      */
     private void genPoolFinals() {
+        field_ref = new LinkedList<>();
+
         ASTNodeContainer finals = ast.getFinals();
         for (ASTNode node : finals.getNodes()) {
             short nameIndex = 0;
             STObject stobject = node.getObject();
+            field_ref.add(countConstantPool);
             addToPool(new CPConstant((byte) CPTypes.FIELD.value, classIndex , (short) (countConstantPool + 1)));
             short key = getKeyByStringValue("I");
             if( key != 0){
@@ -155,15 +172,16 @@ public class CPGenerator {
         #22 = Utf8               dyn1
      */
     private void genPoolCalls() {
-        ASTNodeContainer methods = ast.getMethods();
-        for (ASTNode n : methods.getNodes()) {
+        ASTNodeContainer methodsList = ast.getMethods();
+        for (ASTNode n : methodsList.getNodes()) {
             findNextCalledNode(n.getLink());
         }
 
-        for (ASTNode n : methods.getNodes()) {
+        for (ASTNode n : methodsList.getNodes()) {
             if(called.contains(n.getObject().getName())){
                 String pKey = getPKey(n);
                 short key = getKeyByStringValue(pKey);
+                short nameIndex = (short) (countConstantPool + 2);
                 if( key != 0){
                     addToPool(new CPConstant((byte) CPTypes.METHOD.value, classIndex , (short) (countConstantPool + 1)));
                     addToPool(new CPConstant((byte) CPTypes.NAMEANDTYPE.value, (short) (countConstantPool + 1), key));
@@ -172,8 +190,10 @@ public class CPGenerator {
                     addToPool(new CPConstant((byte) CPTypes.METHOD.value, classIndex , (short) (countConstantPool + 1)));
                     addToPool(new CPConstant((byte) CPTypes.NAMEANDTYPE.value, (short) (countConstantPool + 1), (short) (countConstantPool + 2)));
                     addToPool(new CPConstant((byte) CPTypes.UTF8.value, (short) n.getObject().getName().length(), n.getObject().getName()));
+                    key = countConstantPool;
                     addToPool(new CPConstant((byte) CPTypes.UTF8.value, (short) pKey.length(), pKey));
                 }
+                methods.add(new Method((short)1, nameIndex, key, (short) 0, null));
             }
         }
 
@@ -181,24 +201,19 @@ public class CPGenerator {
         for (ASTNode n : globals.getNodes()) {
             if(called.contains(n.getObject().getName())){
                 short key = getKeyByStringValue("I");
-                short nameIndex = 0;
+                short nameIndex = (short) (countConstantPool + 2);
                 if( key != 0){
                     addToPool(new CPConstant((byte) CPTypes.FIELD.value, classIndex , (short) (countConstantPool + 1)));
                     addToPool(new CPConstant((byte) CPTypes.NAMEANDTYPE.value, (short) (countConstantPool + 1), key));
-                    nameIndex = countConstantPool;
                     addToPool(new CPConstant((byte) CPTypes.UTF8.value, (short) n.getObject().getName().length(), n.getObject().getName()));
                 }else{
                     addToPool(new CPConstant((byte) CPTypes.FIELD.value, classIndex , (short) (countConstantPool + 1)));
                     addToPool(new CPConstant((byte) CPTypes.NAMEANDTYPE.value, (short) (countConstantPool + 1), (short) (countConstantPool + 2)));
-                    nameIndex = countConstantPool;
                     addToPool(new CPConstant((byte) CPTypes.UTF8.value, (short) n.getObject().getName().length(), n.getObject().getName()));
                     key = countConstantPool;
                     addToPool(new CPConstant((byte) CPTypes.UTF8.value, (short)1, "I"));
                 }
-
-                // add Globals to Fieldlist
-                Field field = new Field((short)0, nameIndex, key, (short) 0, null);
-                fields.add(field);
+                fields.add(new Field((short)0, nameIndex, key, (short) 0, null));
             }
         }
     }
@@ -269,25 +284,30 @@ public class CPGenerator {
      */
     private void genPoolCodeHead() {
         String c = "Code";
+        codeIndex = countConstantPool;
         addToPool(new CPConstant((byte) CPTypes.UTF8.value, (short) c.length(), c));
         String lnt = "LineNumberTable";
+        lntIndex = countConstantPool;
         addToPool(new CPConstant((byte) CPTypes.UTF8.value, (short) lnt.length(), lnt));
         String smt = "StackMapTable";                                                               //TODO
         addToPool(new CPConstant((byte) CPTypes.UTF8.value, (short) smt.length(), smt));
     }
 
     private void genPoolCodeBody() {
-        ASTNodeContainer methods = ast.getMethods();
-        for (ASTNode n : methods.getNodes()) {
+        ASTNodeContainer methodList = ast.getMethods();
+        for (ASTNode n : methodList.getNodes()) {
             if(!called.contains(n.getObject().getName())){
                 String pKey = getPKey(n);
                 short key = getKeyByStringValue(pKey);
+                short nameIndex = countConstantPool;
                 if( key != 0){
                     addToPool(new CPConstant((byte) CPTypes.UTF8.value, (short) n.getObject().getName().length(), n.getObject().getName()));
                 }else{
                     addToPool(new CPConstant((byte) CPTypes.UTF8.value, (short) n.getObject().getName().length(), n.getObject().getName()));
+                    key = countConstantPool;
                     addToPool(new CPConstant((byte) CPTypes.UTF8.value, (short) pKey.length(), pKey));
                 }
+                methods.add(new Method((short)1, nameIndex, key, (short) 0, null));
             }
         }
     }
@@ -317,6 +337,15 @@ public class CPGenerator {
     private Short getKeyByStringValue(String value) {
         for (Map.Entry<Short,CPConstant> entry : constantPool.entrySet()) {
             if (entry.getValue().getsValue() != null && value.equals(entry.getValue().getsValue())) {
+                return entry.getKey();
+            }
+        }
+        return 0;
+    }
+
+    private Short getKeyByIntValue(int value) {
+        for (Map.Entry<Short,CPConstant> entry : constantPool.entrySet()) {
+            if (value == entry.getValue().getiValue()) {
                 return entry.getKey();
             }
         }
@@ -380,5 +409,103 @@ public class CPGenerator {
             count++;
         }
     }
-    
+
+    // CODEGEN
+
+
+    public void genCode(){
+        genClassCode();
+    }
+
+
+    private void genClassCode(){
+        codeBuffer.clear();
+        cur = 0;
+
+        List<Attribut> attCode = new LinkedList<>();
+        List<Attribut> attInfo = new LinkedList<>();
+        List<Attribut> attLnt = new LinkedList<>();
+
+        //GENHEAD
+        insertByte(InsSet.ALOAD_0.bytes);
+        insertByte(InsSet.INVOKESPECIAL.bytes);
+        insertShort((short)1);
+
+        //GENCODE
+        int i = 0;
+        ASTNodeContainer finals = ast.getFinals();
+        for (ASTNode node : finals.getNodes()) {
+            STObject stobject = node.getObject();
+
+            insertByte(InsSet.ALOAD_0.bytes);
+
+            byte cons = getConst(stobject.getIntValue());
+            if( cons == InsSet.BIPUSH.bytes ){
+                insertByte(cons);
+                insertByte((byte)stobject.getIntValue());
+            }else{
+                insertByte(cons);
+            }
+
+            insertByte(InsSet.PUTFIELD.bytes);
+            insertShort(field_ref.get(i));
+            i++;
+        }
+
+        //GENEND
+        insertByte(InsSet.RETURN.bytes);
+
+        byte[] code = new byte[cur];
+        codeBuffer.get(0, code, 0, code.length);
+
+        //TODO line_number_table_length 6 + 1
+        //attLnt.add(new Attribut((short) 0,(short) 1));
+        //attInfo.add(new Attribut(lntIndex, (short)6, (short)1, attLnt));
+
+        short size = (short)(12 + cur + (attInfo.size()*8) + (attLnt.size()*4));
+        Attribut classCode = new Attribut(codeIndex, size, (short)2, (short)1, cur, code, (short)attInfo.size(), attInfo);
+        attCode.add(classCode);
+
+        methods.get(0).setCountAttributes((short)1);
+        methods.get(0).setAttributes(attCode);
+    }
+
+
+
+
+    private void genMethodCode(){
+
+    }
+
+
+
+    private byte getConst(int z){
+        return switch (z) {
+            case 0 -> InsSet.ICONST_0.bytes;
+            case 1 -> InsSet.ICONST_1.bytes;
+            case 2 -> InsSet.ICONST_2.bytes;
+            case 3 -> InsSet.ICONST_3.bytes;
+            case 4 -> InsSet.ICONST_4.bytes;
+            case 5 -> InsSet.ICONST_5.bytes;
+            default -> InsSet.BIPUSH.bytes;
+        };
+    }
+
+
+
+    void insertShort(short cp) {
+        codeBuffer.putShort(cp);
+        cur = cur + 2;
+    }
+
+    void insertInt(int cp) {
+        codeBuffer.putInt(cp);
+        cur = cur + 4;
+    }
+
+    void insertByte(byte cp) {
+        codeBuffer.put(cp);
+        cur++;
+    }
+
 }
