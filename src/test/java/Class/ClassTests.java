@@ -15,18 +15,12 @@ public class ClassTests {
     ASTPrinter printer = new ASTPrinter();
 
     // files
-    private static final String CLASS_FILE_1        = "./src/test/resources/class_test/ClassTest1.java";
     private static final String CLASS_FILE_2        = "./src/test/resources/class_test/ClassTest2.java";
-    private static final String FSU_TEST            = "./src/test/resources/pass_test/Test.java";
+    private static final String FSU_TEST            = "./src/test/resources/class_test/Test.java";
 
     @Test
     public void FSUTest_complete() throws FileNotFoundException {
-        runTest(FSU_TEST, false, false, true);
-    }
-
-    @Test
-    public void ClassTest1() throws FileNotFoundException {
-        runTest(CLASS_FILE_1, true, false, false);
+        runTest(FSU_TEST, true, false, true);
     }
 
     @Test
