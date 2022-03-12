@@ -44,6 +44,8 @@ public class Parser {
 
     private String AST_ID;
 
+    SymbolTable subST;
+    SymbolTable bufferSubST;
 
     public Parser(String filePath) throws FileNotFoundException {
         this.scanner = new Scanner(filePath);
@@ -322,6 +324,8 @@ public class Parser {
         ASTNode internProcedureNode = new ASTNode(astID++, actualToken.getValue(), ASTClass.PROD);
         checkActualParameters();
 
+        internProcedureNode.setObject(new STObject(bufferSubST));
+
         return internProcedureNode;
     }
 
@@ -402,12 +406,22 @@ public class Parser {
         if ( bufferToken.getType().name().equals(TokenType.IDENT.name()) ||
              bufferToken.getType().name().equals(TokenType.NUMBER.name()) ){
             checkExpression();
+            getParam();
             while (bufferToken.getType().name().equals(TokenType.COMMA.name())) {
                 readNextToken(); //read checked tokens from buffer
                 checkExpression();
+                getParam();
             }
         }
         checkRBracket();
+        subST = subST.getEnclose();
+    }
+
+    private void getParam() {
+        if(actualToken.getType().equals(TokenType.IDENT) ||
+            actualToken.getType().equals(TokenType.NUMBER) ){
+            subST.insert(new STObject(actualToken.getValue(), ObjClass.PAR));
+        }
     }
 
     /**
@@ -481,6 +495,7 @@ public class Parser {
             checkRBracket();
         } else if ( actualToken.getType().name().equals(TokenType.IDENT.name()) &&
                     bufferToken.getType().name().equals(TokenType.LPAREN.name()) ){
+            getMethod();
             factorNode = checkInternProcedureCall();
         } else if ( !(actualToken.getType().name().equals(TokenType.IDENT.name()) ||
                       actualToken.getType().name().equals(TokenType.NUMBER.name())) ){
@@ -495,6 +510,22 @@ public class Parser {
             factorNode = new ASTNode(astID++, actualToken.getValue(), ASTClass.VAR);
         }
         return factorNode;
+    }
+
+    private void getMethod() {
+        if(actualToken.getType().equals(TokenType.IDENT) ){
+            System.out.println(actualToken.getValue());
+            if(subST != null){
+                SymbolTable s;
+                s = new SymbolTable(subST);
+                subST.insert(new STObject(actualToken.getValue(), ObjClass.PROC, s));
+                subST = s;
+            }else{
+                bufferSubST = new SymbolTable();
+                subST = bufferSubST;
+            }
+        }
+
     }
 
 

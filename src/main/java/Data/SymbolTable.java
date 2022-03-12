@@ -23,6 +23,9 @@ public class SymbolTable {
         return objects;
     }
 
+    public SymbolTable getEnclose() {
+        return enclose;
+    }
 
     public Boolean insert(STObject obj) {
         if(objects.contains(obj)){

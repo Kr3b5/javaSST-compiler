@@ -48,6 +48,17 @@ public class STObject {
     }
 
 
+    public STObject(SymbolTable symtab) {
+        this.name = null;
+        this.objClass = ObjClass.PAR;
+        this.symtab = symtab;
+    }
+
+    public STObject(String name, ObjClass objClass) {
+        this.name = name;
+        this.objClass = objClass;
+    }
+
     public String getName() {
         return name;
     }

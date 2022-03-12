@@ -93,6 +93,10 @@ public class ASTNode {
         return object;
     }
 
+    public void setObject(STObject object) {
+        this.object = object;
+    }
+
     public int getConstant() {
         return constant;
     }
