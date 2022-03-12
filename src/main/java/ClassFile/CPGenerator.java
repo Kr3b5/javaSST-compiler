@@ -8,14 +8,12 @@ import ClassData.*;
 import Data.ObjClass;
 import Data.STObject;
 import Data.STType;
+import Data.TokenType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.nio.ByteBuffer;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 // https://docs.oracle.com/javase/specs/jvms/se15/html/jvms-4.html#jvms-4.4
 public class CPGenerator {
@@ -44,8 +42,9 @@ public class CPGenerator {
     private final ByteBuffer codeBuffer = ByteBuffer.allocate(65536);
     private int cur;
 
-    List<Short> field_ref;
-
+    private List<StackSafe> stackSafes;
+    private List<Short> field_ref;
+    private boolean typeInt;
     //debug
     boolean debugMode;
 
@@ -57,6 +56,7 @@ public class CPGenerator {
         this.ast = ast;
         this.called = new LinkedList<>();
         debugMode = false;
+        typeInt = false;
     }
 
     //SETTER + GETTER
@@ -415,6 +415,7 @@ public class CPGenerator {
 
     public void genCode(){
         genClassCode();
+        genMethodCode();
     }
 
 
@@ -439,7 +440,7 @@ public class CPGenerator {
 
             insertByte(InsSet.ALOAD_0.bytes);
 
-            byte cons = getConst(stobject.getIntValue());
+            byte cons = getConst(stobject.getIntValue());           //TODO Refactor doppeltes insertBytes
             if( cons == InsSet.BIPUSH.bytes ){
                 insertByte(cons);
                 insertByte((byte)stobject.getIntValue());
@@ -474,9 +475,217 @@ public class CPGenerator {
 
 
     private void genMethodCode(){
+        stackSafes = new LinkedList<>();
+        int mID = 1;
+        for (ASTNode methodroot : ast.getMethods().getNodes()) {
+            codeBuffer.clear();
+            cur = 0;
 
+            //getParameter
+            int i = 1;
+            for (STObject param : methodroot.getObject().getSymtab().getObjects()) {
+                if(param.getObjClass().equals(ObjClass.PAR)) stackSafes.add(new StackSafe(i, param.getName())); i++;
+            }
+
+            //get Type for Return
+            if(methodroot.getObject().getSTType().equals(STType.INT)){
+                typeInt = true;
+            }else{
+                typeInt = false;
+            }
+
+            analyzeNextNode(methodroot.getLink());
+
+            byte[] code = new byte[cur];
+            codeBuffer.get(0, code, 0, code.length);
+
+            short size = (short)(12 + cur);
+            Attribut classCode = new Attribut(codeIndex, size, (short)2, (short)1, cur, code, (short)0, null);
+
+            List<Attribut> attCode = new LinkedList<>();
+            attCode.add(classCode);
+
+            methods.get(mID).setCountAttributes((short)1);
+            methods.get(mID).setAttributes(attCode);
+            mID++;
+        }
     }
 
+
+
+    private void analyzeNextNode(ASTNode n) {
+        if(n.getNodeClass().equals(ASTClass.ASSIGN)){
+            analyzeNextNode(n.getRight());
+            setVar(n.getLeft().getName());
+        }
+        else if(n.getNodeClass().equals(ASTClass.VAR)){
+            loadVar(n.getName());
+        }
+        else if(n.getNodeClass().equals(ASTClass.INT)){
+            setInt(n.getConstant());
+        }
+        else if(n.getNodeClass().equals(ASTClass.PROD)){
+            callProd(n);
+        }
+        else if(n.getNodeClass().equals(ASTClass.BINOP)){
+            analyzeNextNode(n.getLeft());
+            analyzeNextNode(n.getRight());
+            setOperator(n);
+        }
+        else if(n.getNodeClass().equals(ASTClass.IF_ELSE)){
+            setIfElse(n);
+        }
+        else if(n.getNodeClass().equals(ASTClass.WHILE)){
+            setWhile(n);
+        }
+        else if(n.getNodeClass().equals(ASTClass.RETURN)){
+            if(n.getLeft() != null) analyzeNextNode(n.getLeft());
+            setReturn();
+        }
+
+        if(n.getLink() != null) analyzeNextNode(n.getLink());
+    }
+
+    //WHILE
+    private void setWhile(ASTNode n) {
+        int posBegin = cur;
+        int posEnd = 0;
+
+        analyzeNextNode(n.getLeft()); //BINOP without Location
+
+        //set pos-End temp to short 0
+        posEnd = cur;
+        insertShort((short)0);
+
+        analyzeNextNode(n.getRight());
+
+        //set GOTO
+        insertByte(InsSet.GOTO.bytes);
+        insertShort((short)(posBegin - (cur-1)));
+
+        //replace pos End
+        replaceShort(posEnd, (short)(cur - (posEnd-1)));
+    }
+
+    // IFELSE
+    private void setIfElse(ASTNode n) {
+        int posElse = 0;
+        int posEnd = 0;
+
+        // IF
+        ASTNode ifNode = n.getLeft();
+        analyzeNextNode(ifNode.getLeft());      //BINOP without Location
+
+        //set pos-Else short temp to 0
+        posElse = cur;
+        insertShort((short)0);
+
+        analyzeNextNode(ifNode.getRight());
+
+        //set GOTO
+        insertByte(InsSet.GOTO.bytes);
+        //set pos-End short temp to 0
+        posEnd = cur;
+        insertShort((short)0);
+
+        //ELSE
+        //replace pos-Else
+        replaceShort(posElse, (short)(cur - (posElse-1)));
+
+        analyzeNextNode(n.getRight());
+
+        //replace GOTO
+        replaceShort(posEnd, (short)(cur - (posEnd-1)));
+    }
+
+    // RETURN
+    private void setReturn() {
+        if(typeInt){
+            insertByte(InsSet.IRETURN.bytes);
+        }else{
+            insertByte(InsSet.RETURN.bytes);
+        }
+    }
+
+    // BINOP - setOperator
+    private void setOperator(ASTNode n) {
+        if(n.getNodeSubclass().equals(TokenType.PLUS)) {                // +
+            insertByte(InsSet.IADD.bytes);
+        }
+        else if(n.getNodeSubclass().equals(TokenType.MINUS)) {          // -
+            insertByte(InsSet.ISUB.bytes);
+        }
+        else if(n.getNodeSubclass().equals(TokenType.TIMES)) {          // *
+            insertByte(InsSet.IMUL.bytes);
+        }
+        else if(n.getNodeSubclass().equals(TokenType.SLASH)) {          // /
+            insertByte(InsSet.IDIV.bytes);
+        }
+        else if(n.getNodeSubclass().equals(TokenType.EQUAL)) {          // ==  -> !=
+            insertByte(InsSet.IFICMPNE.bytes);
+        }
+        else if(n.getNodeSubclass().equals(TokenType.NEQUAL)) {         // !=  -> ==
+            insertByte(InsSet.IFICMPEQ.bytes);
+        }
+        else if(n.getNodeSubclass().equals(TokenType.GREATER)) {        // >  -> <=
+            insertByte(InsSet.IFICMPLE.bytes);
+        }
+        else if(n.getNodeSubclass().equals(TokenType.GR_EQ)) {          // >= -> <
+            insertByte(InsSet.IFICMPLT.bytes);
+        }
+        else if(n.getNodeSubclass().equals(TokenType.SMALLER)) {        // <  -> >=
+            insertByte(InsSet.IFICMPGE.bytes);
+        }
+        else if(n.getNodeSubclass().equals(TokenType.SM_EQ)) {          // <= -> >
+            insertByte(InsSet.IFICMPGT.bytes);
+        }
+    }
+
+    // INT - SET
+    private void setInt(int z){
+        byte cons = getConst(z);
+        insertByte(cons);
+        if( cons == InsSet.BIPUSH.bytes ){
+            insertByte((byte)z);
+        }
+    }
+
+    // VAR - SET
+    private void setVar(String var){
+        int id = getStackID(var);
+        if(id != 0){
+            insertByte(getIStore(id));
+            if(id > 3){
+                insertByte((byte) id);
+            }
+        }else{
+            id = stackSafes.size()+1;
+            insertByte(getIStore(id));
+            if(id > 3){
+                insertByte((byte) id);
+            }
+            stackSafes.add(new StackSafe(id, var));
+        }
+    }
+
+    // VAR - LOAD
+    private void loadVar(String var){
+        insertByte(getILoad(getStackID(var)));
+    }
+
+    private int getStackID(String var){
+        for (StackSafe s : stackSafes) {
+            if(s.getVar().equals(var)){
+                return s.getIndex();
+            }
+        }
+        return 0;
+    }
+
+    // PROD - CALL
+    private void callProd(ASTNode n){
+        // TODO Parameter !!
+    }
 
 
     private byte getConst(int z){
@@ -491,11 +700,35 @@ public class CPGenerator {
         };
     }
 
+    private byte getIStore(int z){
+        return switch (z) {
+            case 0 -> InsSet.ISTORE_0.bytes;
+            case 1 -> InsSet.ISTORE_1.bytes;
+            case 2 -> InsSet.ISTORE_2.bytes;
+            case 3 -> InsSet.ISTORE_3.bytes;
+            default -> InsSet.ISTORE.bytes;
+        };
+    }
+
+    private byte getILoad(int id){
+        return switch (id) {
+            case 0 -> InsSet.ILOAD_0.bytes;
+            case 1 -> InsSet.ILOAD_1.bytes;
+            case 2 -> InsSet.ILOAD_2.bytes;
+            case 3 -> InsSet.ILOAD_3.bytes;
+            default -> InsSet.ILOAD.bytes;
+        };
+    }
 
 
-    void insertShort(short cp) {
+
+    private void insertShort(short cp) {
         codeBuffer.putShort(cp);
         cur = cur + 2;
+    }
+
+    private void replaceShort(int index, short cp) {
+        codeBuffer.putShort(index, cp);
     }
 
     void insertInt(int cp) {
@@ -507,5 +740,13 @@ public class CPGenerator {
         codeBuffer.put(cp);
         cur++;
     }
+
+    private void printByteCode(byte[] bytes) {
+        for (byte b : bytes) {
+            System.out.format("%x ", b);
+        }
+        System.out.print('\n');
+    }
+
 
 }
