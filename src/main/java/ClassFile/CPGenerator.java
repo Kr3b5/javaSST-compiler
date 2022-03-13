@@ -5,10 +5,7 @@ import AbstractSyntaxTree.ASTClass;
 import AbstractSyntaxTree.ASTNode;
 import AbstractSyntaxTree.ASTNodeContainer;
 import ClassData.*;
-import Data.ObjClass;
-import Data.STObject;
-import Data.STType;
-import Data.TokenType;
+import Data.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -45,6 +42,9 @@ public class CPGenerator {
     private List<StackSafe> stackSafes;
     private List<Short> field_ref;
     private boolean typeInt;
+
+    private int countMethods;
+
     //debug
     boolean debugMode;
 
@@ -490,7 +490,6 @@ public class CPGenerator {
 
     private void genMethodCode(){
         stackSafes = new LinkedList<>();
-        int mID = 1;
         for (ASTNode methodroot : ast.getMethods().getNodes()) {
             codeBuffer.clear();
             cur = 0;
@@ -519,12 +518,29 @@ public class CPGenerator {
             List<Attribut> attCode = new LinkedList<>();
             attCode.add(classCode);
 
+
+
+
+            int mID = getMethodsIndex(methodroot.getObject().getName());
             methods.get(mID).setCountAttributes((short)1);
             methods.get(mID).setAttributes(attCode);
-            mID++;
         }
     }
 
+    private int getMethodsIndex(String methodName){
+        int index = 0;
+        for (Method m: methods) {
+            if(getCPNamebyIndex(m.getNameIndex()).equals(methodName)) {
+                return index;
+            }
+            index++;
+        }
+        return 0;
+    }
+
+    private String getCPNamebyIndex(short index){
+        return constantPool.get(index).getsValue();
+    }
 
 
     private void analyzeNextNode(ASTNode n) {
@@ -684,7 +700,9 @@ public class CPGenerator {
 
     // VAR - LOAD
     private void loadVar(String var){
-        insertByte(getILoad(getStackID(var)));
+        byte b = getILoad(getStackID(var));
+        insertByte(b);
+        if(b == InsSet.ILOAD.bytes) insertByte((byte) getStackID(var));
     }
 
     private int getStackID(String var){
@@ -696,9 +714,75 @@ public class CPGenerator {
         return 0;
     }
 
+    /*
+     9: aload_0
+    10: iload_2
+    11: iload_3
+    12: invokevirtual #25                 // Method meth2:(II)I
+     */
+
     // PROD - CALL
     private void callProd(ASTNode n){
-        // TODO Parameter !!
+        //ALOAD
+        int countMeth = getCountMethods(n.getObject().getSymtab());
+        for (int i = 0; i < countMeth; i++){
+            insertByte(InsSet.ALOAD_0.bytes);
+        }
+
+        stToByteCode(n.getObject().getSymtab());
+
+        //TODO main meth
+        insertByte(InsSet.INVOKEVIRTUAL.bytes);
+        insertShort(getMethodRef(n.getName()));
+    }
+
+    private void stToByteCode(SymbolTable st){
+        for (STObject stObject: st.getObjects()) {
+            if(stObject.getObjClass().equals(ObjClass.PROC)){
+                stToByteCode(stObject.getSymtab());
+                insertByte(InsSet.INVOKEVIRTUAL.bytes);
+                insertShort(getMethodRef(stObject.getName()));
+            }else if(stObject.getObjClass().equals(ObjClass.CONST)){
+                setInt(Integer.parseInt(stObject.getName()));
+            }else{
+                loadVar(stObject.getName());
+            }
+        }
+    }
+
+    private short getMethodRef(String varname){
+        return getRefKeyByNameandType(getKeyByStringValue(varname));
+    }
+
+
+    private Short getRefKeyByNameandType(short index) {
+        short refindex = 0;
+        for (Map.Entry<Short,CPConstant> entry : constantPool.entrySet()) {
+            if (index == entry.getValue().getBytefield1()) {
+                refindex = entry.getKey();
+            }
+        }
+        for (Map.Entry<Short,CPConstant> entry : constantPool.entrySet()) {
+            if (refindex == entry.getValue().getBytefield2()) {
+                refindex = entry.getKey();
+            }
+        }
+        return refindex;
+    }
+
+    private int getCountMethods(SymbolTable st){
+        countMethods = 1;
+        getObjects(st);
+        return countMethods;
+    }
+
+    private void getObjects(SymbolTable st){
+        for (STObject stObject: st.getObjects()) {
+            if(stObject.getObjClass().equals(ObjClass.PROC)){
+                countMethods++;
+                getObjects(stObject.getSymtab());
+            }
+        }
     }
 
 

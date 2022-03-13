@@ -418,9 +418,10 @@ public class Parser {
     }
 
     private void getParam() {
-        if(actualToken.getType().equals(TokenType.IDENT) ||
-            actualToken.getType().equals(TokenType.NUMBER) ){
+        if(actualToken.getType().equals(TokenType.IDENT)){
             subST.insert(new STObject(actualToken.getValue(), ObjClass.PAR));
+        }else if(actualToken.getType().equals(TokenType.NUMBER)){
+            subST.insert(new STObject(actualToken.getValue(), ObjClass.CONST));
         }
     }
 
@@ -514,7 +515,6 @@ public class Parser {
 
     private void getMethod() {
         if(actualToken.getType().equals(TokenType.IDENT) ){
-            System.out.println(actualToken.getValue());
             if(subST != null){
                 SymbolTable s;
                 s = new SymbolTable(subST);
