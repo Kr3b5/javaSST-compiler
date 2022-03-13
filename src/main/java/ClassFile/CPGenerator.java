@@ -226,6 +226,9 @@ public class CPGenerator {
             if(!called.contains(node.getName())){
                 called.add(node.getName());
             }
+            if(node.getObject() != null){
+                findNextCalledSubNodes(node.getObject().getSymtab());
+            }
         }
         if(node.getLeft() != null){
             findNextCalledNode(node.getLeft());
@@ -235,6 +238,17 @@ public class CPGenerator {
         }
         if(node.getLink() != null){
             findNextCalledNode(node.getLink());
+        }
+    }
+
+    private void findNextCalledSubNodes(SymbolTable st){
+        for (STObject stObject: st.getObjects()) {
+            if(stObject.getObjClass().equals(ObjClass.PROC)){
+                if(!called.contains(stObject.getName())){
+                    called.add(stObject.getName());
+                }
+                if(stObject.getSymtab() != null) findNextCalledSubNodes(stObject.getSymtab());
+            }
         }
     }
 
