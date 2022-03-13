@@ -44,6 +44,7 @@ public class CPGenerator {
 
     private int countMethods;
     private boolean containsReturnNode;
+    private boolean containsLastReturnVoid;
 
     //debug
     boolean debugMode;
@@ -498,6 +499,8 @@ public class CPGenerator {
 
             analyzeNextNode(methodroot.getLink());
 
+            if(!typeInt && !containsLastReturnVoid) setReturn();
+
             byte[] code = new byte[cur];
             codeBuffer.get(0, code, 0, code.length);
 
@@ -529,6 +532,7 @@ public class CPGenerator {
     }
 
     private void analyzeNextNode(ASTNode n) {
+        containsLastReturnVoid = false;
         if(n.getNodeClass().equals(ASTClass.ASSIGN)){
             analyzeNextNode(n.getRight());
             setVar(n.getLeft().getName());
@@ -556,7 +560,7 @@ public class CPGenerator {
         else if(n.getNodeClass().equals(ASTClass.RETURN)){
             if(n.getLeft() != null) analyzeNextNode(n.getLeft());
             setReturn();
-            containsReturnNode = true;
+            containsReturnNode = containsLastReturnVoid = true;
         }
 
         if(n.getLink() != null) analyzeNextNode(n.getLink());
