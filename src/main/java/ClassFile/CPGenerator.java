@@ -34,7 +34,6 @@ public class CPGenerator {
     private short superclassIndex;
     private short sourcefileIndex;
     private short codeIndex;
-    private short lntIndex;
 
     private final ByteBuffer codeBuffer = ByteBuffer.allocate(65536);
     private int cur;
@@ -193,7 +192,7 @@ public class CPGenerator {
                     key = countConstantPool;
                     addToPool(new CPConstant((byte) CPTypes.UTF8.value, (short) pKey.length(), pKey));
                 }
-                methods.add(new Method((short)1, nameIndex, key, (short) 0, null));
+                //methods.add(new Method((short)1, nameIndex, key, (short) 0, null));
             }
         }
 
@@ -301,10 +300,7 @@ public class CPGenerator {
         codeIndex = countConstantPool;
         addToPool(new CPConstant((byte) CPTypes.UTF8.value, (short) c.length(), c));
         String lnt = "LineNumberTable";
-        lntIndex = countConstantPool;
         addToPool(new CPConstant((byte) CPTypes.UTF8.value, (short) lnt.length(), lnt));
-        String smt = "StackMapTable";                                                               //TODO
-        addToPool(new CPConstant((byte) CPTypes.UTF8.value, (short) smt.length(), smt));
     }
 
     private void genPoolCodeBody() {
@@ -321,7 +317,7 @@ public class CPGenerator {
                     key = countConstantPool;
                     addToPool(new CPConstant((byte) CPTypes.UTF8.value, (short) pKey.length(), pKey));
                 }
-                methods.add(new Method((short)1, nameIndex, key, (short) 0, null));
+                //methods.add(new Method((short)1, nameIndex, key, (short) 0, null));
             }
         }
     }
@@ -347,7 +343,6 @@ public class CPGenerator {
     }
 
 
-
     private Short getKeyByStringValue(String value) {
         for (Map.Entry<Short,CPConstant> entry : constantPool.entrySet()) {
             if (entry.getValue().getsValue() != null && value.equals(entry.getValue().getsValue())) {
@@ -356,16 +351,6 @@ public class CPGenerator {
         }
         return 0;
     }
-
-    private Short getKeyByIntValue(int value) {
-        for (Map.Entry<Short,CPConstant> entry : constantPool.entrySet()) {
-            if (value == entry.getValue().getiValue()) {
-                return entry.getKey();
-            }
-        }
-        return 0;
-    }
-
 
     private String getPKey(ASTNode n){
         int cInts = 0;
@@ -426,10 +411,20 @@ public class CPGenerator {
 
     // CODEGEN
 
-
     public void genCode(){
+        addMethods();
         genClassCode();
         genMethodCode();
+    }
+
+    private void addMethods() {
+        ASTNodeContainer methodsList = ast.getMethods();
+        for (ASTNode n : methodsList.getNodes()) {
+            String pKey = getPKey(n);
+            short signatureIndex    = getKeyByStringValue(pKey);
+            short nameIndex         = getKeyByStringValue(n.getObject().getName());
+            methods.add(new Method((short)1, nameIndex, signatureIndex, (short) 0, null));
+        }
     }
 
 
@@ -454,12 +449,10 @@ public class CPGenerator {
 
             insertByte(InsSet.ALOAD_0.bytes);
 
-            byte cons = getConst(stobject.getIntValue());           //TODO Refactor doppeltes insertBytes
+            byte cons = getConst(stobject.getIntValue());
+            insertByte(cons);
             if( cons == InsSet.BIPUSH.bytes ){
-                insertByte(cons);
                 insertByte((byte)stobject.getIntValue());
-            }else{
-                insertByte(cons);
             }
 
             insertByte(InsSet.PUTFIELD.bytes);
@@ -473,19 +466,14 @@ public class CPGenerator {
         byte[] code = new byte[cur];
         codeBuffer.get(0, code, 0, code.length);
 
-        //TODO line_number_table_length 6 + 1
-        //attLnt.add(new Attribut((short) 0,(short) 1));
-        //attInfo.add(new Attribut(lntIndex, (short)6, (short)1, attLnt));
 
-        short size = (short)(12 + cur + (attInfo.size()*8) + (attLnt.size()*4));
-        Attribut classCode = new Attribut(codeIndex, size, (short)2, (short)1, cur, code, (short)attInfo.size(), attInfo);
+        short size = (short)(12 + cur);
+        Attribut classCode = new Attribut(codeIndex, size, (short)2, (short)1, cur, code, (short)0, null);      //TODO Attributes
         attCode.add(classCode);
 
         methods.get(0).setCountAttributes((short)1);
         methods.get(0).setAttributes(attCode);
     }
-
-
 
 
     private void genMethodCode(){
@@ -518,9 +506,6 @@ public class CPGenerator {
             List<Attribut> attCode = new LinkedList<>();
             attCode.add(classCode);
 
-
-
-
             int mID = getMethodsIndex(methodroot.getObject().getName());
             methods.get(mID).setCountAttributes((short)1);
             methods.get(mID).setAttributes(attCode);
@@ -541,7 +526,6 @@ public class CPGenerator {
     private String getCPNamebyIndex(short index){
         return constantPool.get(index).getsValue();
     }
-
 
     private void analyzeNextNode(ASTNode n) {
         if(n.getNodeClass().equals(ASTClass.ASSIGN)){
@@ -731,7 +715,6 @@ public class CPGenerator {
 
         stToByteCode(n.getObject().getSymtab());
 
-        //TODO main meth
         insertByte(InsSet.INVOKEVIRTUAL.bytes);
         insertShort(getMethodRef(n.getName()));
     }
@@ -819,7 +802,6 @@ public class CPGenerator {
     }
 
 
-
     private void insertShort(short cp) {
         codeBuffer.putShort(cp);
         cur = cur + 2;
@@ -829,21 +811,9 @@ public class CPGenerator {
         codeBuffer.putShort(index, cp);
     }
 
-    void insertInt(int cp) {
-        codeBuffer.putInt(cp);
-        cur = cur + 4;
-    }
-
     void insertByte(byte cp) {
         codeBuffer.put(cp);
         cur++;
-    }
-
-    private void printByteCode(byte[] bytes) {
-        for (byte b : bytes) {
-            System.out.format("%x ", b);
-        }
-        System.out.print('\n');
     }
 
 
