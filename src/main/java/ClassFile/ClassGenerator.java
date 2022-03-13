@@ -48,7 +48,6 @@ public class ClassGenerator {
 
     // globals
     private final AST ast;
-    private final SymbolTable symbolTable;
 
     private byte[] code;
     ByteBuffer buffer = ByteBuffer.allocate(65536); //TODO
@@ -58,9 +57,8 @@ public class ClassGenerator {
     boolean debugMode;
 
     //constructor
-    public ClassGenerator(AST ast, SymbolTable symbolTable) {
+    public ClassGenerator(AST ast) {
         this.ast = ast;
-        this.symbolTable = symbolTable;
         constantPool = new HashMap<>();
         fields = new LinkedList<>();
         methods = new LinkedList<>();

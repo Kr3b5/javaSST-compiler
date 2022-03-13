@@ -137,13 +137,13 @@ public class CPGenerator {
 
         ASTNodeContainer finals = ast.getFinals();
         for (ASTNode node : finals.getNodes()) {
-            short nameIndex = 0;
+            short nameIndex;
             STObject stobject = node.getObject();
             field_ref.add(countConstantPool);
             addToPool(new CPConstant((byte) CPTypes.FIELD.value, classIndex , (short) (countConstantPool + 1)));
             short key = getKeyByStringValue("I");
             if( key != 0){
-                addToPool(new CPConstant((byte) CPTypes.NAMEANDTYPE.value, (short) (countConstantPool + 1), (short) key ));
+                addToPool(new CPConstant((byte) CPTypes.NAMEANDTYPE.value, (short) (countConstantPool + 1), key));
                 nameIndex = countConstantPool;
                 addToPool(new CPConstant((byte) CPTypes.UTF8.value, (short) stobject.getName().length(), stobject.getName()));
             }else{
@@ -182,7 +182,6 @@ public class CPGenerator {
             if(called.contains(n.getObject().getName())){
                 String pKey = getPKey(n);
                 short key = getKeyByStringValue(pKey);
-                short nameIndex = (short) (countConstantPool + 2);
                 if( key != 0){
                     addToPool(new CPConstant((byte) CPTypes.METHOD.value, classIndex , (short) (countConstantPool + 1)));
                     addToPool(new CPConstant((byte) CPTypes.NAMEANDTYPE.value, (short) (countConstantPool + 1), key));
@@ -191,10 +190,8 @@ public class CPGenerator {
                     addToPool(new CPConstant((byte) CPTypes.METHOD.value, classIndex , (short) (countConstantPool + 1)));
                     addToPool(new CPConstant((byte) CPTypes.NAMEANDTYPE.value, (short) (countConstantPool + 1), (short) (countConstantPool + 2)));
                     addToPool(new CPConstant((byte) CPTypes.UTF8.value, (short) n.getObject().getName().length(), n.getObject().getName()));
-                    key = countConstantPool;
                     addToPool(new CPConstant((byte) CPTypes.UTF8.value, (short) pKey.length(), pKey));
                 }
-                //methods.add(new Method((short)1, nameIndex, key, (short) 0, null));
             }
         }
 
@@ -271,7 +268,7 @@ public class CPGenerator {
                 addToPool(new CPConstant((byte) CPTypes.INTEGER.value, stobject.getIntValue()));
 
                 fields.get(i).setCountAttributes((short)1);
-                List attributes = new LinkedList<Attribut>();
+                List<Attribut> attributes = new LinkedList<>();
                 attributes.add(constantValue);
                 fields.get(i).setAttributes(attributes);
                 i++;
@@ -311,15 +308,10 @@ public class CPGenerator {
             if(!called.contains(n.getObject().getName())){
                 String pKey = getPKey(n);
                 short key = getKeyByStringValue(pKey);
-                short nameIndex = countConstantPool;
-                if( key != 0){
-                    addToPool(new CPConstant((byte) CPTypes.UTF8.value, (short) n.getObject().getName().length(), n.getObject().getName()));
-                }else{
-                    addToPool(new CPConstant((byte) CPTypes.UTF8.value, (short) n.getObject().getName().length(), n.getObject().getName()));
-                    key = countConstantPool;
+                addToPool(new CPConstant((byte) CPTypes.UTF8.value, (short) n.getObject().getName().length(), n.getObject().getName()));
+                if (key == 0) {
                     addToPool(new CPConstant((byte) CPTypes.UTF8.value, (short) pKey.length(), pKey));
                 }
-                //methods.add(new Method((short)1, nameIndex, key, (short) 0, null));
             }
         }
     }
@@ -363,9 +355,7 @@ public class CPGenerator {
         }
         //parameter key
         StringBuilder sb = new StringBuilder("(");
-        for(int i = 0; i < cInts; i++ ){
-            sb.append("I");
-        }
+        sb.append("I".repeat(Math.max(0, cInts)));
         sb.append(")");
         if(n.getObject().getSTType().equals(STType.INT)){
             sb.append("I");
@@ -435,8 +425,6 @@ public class CPGenerator {
         cur = 0;
 
         List<Attribut> attCode = new LinkedList<>();
-        List<Attribut> attInfo = new LinkedList<>();
-        List<Attribut> attLnt = new LinkedList<>();
 
         //GENHEAD
         insertByte(InsSet.ALOAD_0.bytes);
@@ -491,11 +479,7 @@ public class CPGenerator {
             }
 
             //get Type for Return
-            if(methodroot.getObject().getSTType().equals(STType.INT)){
-                typeInt = true;
-            }else{
-                typeInt = false;
-            }
+            typeInt = methodroot.getObject().getSTType().equals(STType.INT);
 
             analyzeNextNode(methodroot.getLink());
 
@@ -570,7 +554,7 @@ public class CPGenerator {
     //WHILE
     private void setWhile(ASTNode n) {
         int posBegin = cur;
-        int posEnd = 0;
+        int posEnd;
 
         analyzeNextNode(n.getLeft()); //BINOP without Location
 
@@ -590,7 +574,7 @@ public class CPGenerator {
 
     // IFELSE
     private void setIfElse(ASTNode n) {
-        int posElse = 0;
+        int posElse;
         int posEnd = 0;
         containsReturnNode = false;
 
@@ -724,10 +708,7 @@ public class CPGenerator {
     }
 
     private boolean assignGlobal(String varName){
-        if(findFGNode(varName, ast.getVars().getNodes()) != null){
-            return true;
-        }
-        return false;
+        return findFGNode(varName, ast.getVars().getNodes()) != null;
     }
 
     private STObject findFGNode(String varName, List<ASTNode> nodes){
