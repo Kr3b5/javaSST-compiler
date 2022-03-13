@@ -49,6 +49,7 @@ public enum InsSet {
 
     GOTO                    ((byte) 0xa7),
 
+    GETFIELD                ((byte) 0xb4),
     PUTFIELD                ((byte) 0xb5);
 
 

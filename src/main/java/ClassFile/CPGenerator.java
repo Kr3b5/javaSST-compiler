@@ -479,8 +479,8 @@ public class CPGenerator {
 
 
     private void genMethodCode(){
-        stackSafes = new LinkedList<>();
         for (ASTNode methodroot : ast.getMethods().getNodes()) {
+            stackSafes = new LinkedList<>();
             codeBuffer.clear();
             cur = 0;
 
@@ -693,10 +693,15 @@ public class CPGenerator {
 
     // VAR - LOAD
     private void loadVar(String var){
-        STObject stObject = isFinal(var);
-        if(stObject != null){
-            setInt(stObject.getIntValue());
-        }else{
+        STObject stObjectFinal = isFinal(var);
+        STObject stObjectGlobal = isGlobal(var);
+        if(stObjectFinal != null){                      // Var is final
+            setInt(stObjectFinal.getIntValue());
+        }else if(stObjectGlobal != null){               // Var is global
+            insertByte(InsSet.ALOAD_0.bytes);
+            insertByte(InsSet.GETFIELD.bytes);
+            insertShort(getRef(stObjectGlobal.getName()));
+        }else{                                          // Var is local
             byte b = getILoad(getStackID(var));
             insertByte(b);
             if(b == InsSet.ILOAD.bytes) insertByte((byte) getStackID(var));
@@ -704,7 +709,15 @@ public class CPGenerator {
     }
 
     private STObject isFinal(String varName){
-        for (ASTNode n : ast.getFinals().getNodes()) {
+        return findFGNode(varName, ast.getFinals().getNodes());
+    }
+
+    private STObject isGlobal(String varName){
+        return findFGNode(varName, ast.getVars().getNodes());
+    }
+
+    private STObject findFGNode(String varName, List<ASTNode> nodes){
+        for (ASTNode n : nodes) {
             if(varName.equals(n.getObject().getName())){
                 return n.getObject();
             }
@@ -739,7 +752,7 @@ public class CPGenerator {
         stToByteCode(n.getObject().getSymtab());
 
         insertByte(InsSet.INVOKEVIRTUAL.bytes);
-        insertShort(getMethodRef(n.getName()));
+        insertShort(getRef(n.getName()));
     }
 
     private void stToByteCode(SymbolTable st){
@@ -747,7 +760,7 @@ public class CPGenerator {
             if(stObject.getObjClass().equals(ObjClass.PROC)){
                 stToByteCode(stObject.getSymtab());
                 insertByte(InsSet.INVOKEVIRTUAL.bytes);
-                insertShort(getMethodRef(stObject.getName()));
+                insertShort(getRef(stObject.getName()));
             }else if(stObject.getObjClass().equals(ObjClass.CONST)){
                 setInt(Integer.parseInt(stObject.getName()));
             }else{
@@ -756,7 +769,7 @@ public class CPGenerator {
         }
     }
 
-    private short getMethodRef(String varname){
+    private short getRef(String varname){
         return getRefKeyByNameandType(getKeyByStringValue(varname));
     }
 
