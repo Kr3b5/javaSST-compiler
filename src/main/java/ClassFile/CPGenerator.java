@@ -43,6 +43,7 @@ public class CPGenerator {
     private boolean typeInt;
 
     private int countMethods;
+    private boolean containsReturnNode;
 
     //debug
     boolean debugMode;
@@ -555,6 +556,7 @@ public class CPGenerator {
         else if(n.getNodeClass().equals(ASTClass.RETURN)){
             if(n.getLeft() != null) analyzeNextNode(n.getLeft());
             setReturn();
+            containsReturnNode = true;
         }
 
         if(n.getLink() != null) analyzeNextNode(n.getLink());
@@ -585,6 +587,7 @@ public class CPGenerator {
     private void setIfElse(ASTNode n) {
         int posElse = 0;
         int posEnd = 0;
+        containsReturnNode = false;
 
         // IF
         ASTNode ifNode = n.getLeft();
@@ -597,10 +600,12 @@ public class CPGenerator {
         analyzeNextNode(ifNode.getRight());
 
         //set GOTO
-        insertByte(InsSet.GOTO.bytes);
-        //set pos-End short temp to 0
-        posEnd = cur;
-        insertShort((short)0);
+        if(!containsReturnNode){
+            insertByte(InsSet.GOTO.bytes);
+            //set pos-End short temp to 0
+            posEnd = cur;
+            insertShort((short)0);
+        }
 
         //ELSE
         //replace pos-Else
@@ -609,7 +614,7 @@ public class CPGenerator {
         analyzeNextNode(n.getRight());
 
         //replace GOTO
-        replaceShort(posEnd, (short)(cur - (posEnd-1)));
+        if(!containsReturnNode) replaceShort(posEnd, (short)(cur - (posEnd-1)));
     }
 
     // RETURN
