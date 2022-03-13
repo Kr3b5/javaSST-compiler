@@ -456,7 +456,11 @@ public class Parser {
         while ( bufferToken.getType().name().equals(TokenType.PLUS.name()) ||
                 bufferToken.getType().name().equals(TokenType.MINUS.name())) {
 
-            simpleExpressionNode = new ASTNode(astID++, termNode, ASTClass.BINOP, bufferToken.getType());
+            if (simpleExpressionNode.getRight() != null){
+                simpleExpressionNode = new ASTNode(astID++, simpleExpressionNode, ASTClass.BINOP, bufferToken.getType());
+            }else{
+                simpleExpressionNode = new ASTNode(astID++, termNode, ASTClass.BINOP, bufferToken.getType());
+            }
 
             readNextToken(); //read checked tokens from buffer
             termNode = checkTerm();
@@ -475,7 +479,11 @@ public class Parser {
         while ( bufferToken.getType().name().equals(TokenType.TIMES.name()) ||
                 bufferToken.getType().name().equals(TokenType.SLASH.name()) ){
 
-            termNode  =  new ASTNode(astID++, factorNode, ASTClass.BINOP, bufferToken.getType());
+            if (termNode.getRight() != null){
+                termNode  =  new ASTNode(astID++, termNode, ASTClass.BINOP, bufferToken.getType());
+            }else{
+                termNode  =  new ASTNode(astID++, factorNode, ASTClass.BINOP, bufferToken.getType());
+            }
 
             readNextToken(); //read checked tokens from buffer
             factorNode = checkFactor();
