@@ -693,9 +693,23 @@ public class CPGenerator {
 
     // VAR - LOAD
     private void loadVar(String var){
-        byte b = getILoad(getStackID(var));
-        insertByte(b);
-        if(b == InsSet.ILOAD.bytes) insertByte((byte) getStackID(var));
+        STObject stObject = isFinal(var);
+        if(stObject != null){
+            setInt(stObject.getIntValue());
+        }else{
+            byte b = getILoad(getStackID(var));
+            insertByte(b);
+            if(b == InsSet.ILOAD.bytes) insertByte((byte) getStackID(var));
+        }
+    }
+
+    private STObject isFinal(String varName){
+        for (ASTNode n : ast.getFinals().getNodes()) {
+            if(varName.equals(n.getObject().getName())){
+                return n.getObject();
+            }
+        }
+        return null;
     }
 
     private int getStackID(String var){
