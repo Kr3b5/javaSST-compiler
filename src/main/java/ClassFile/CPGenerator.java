@@ -534,6 +534,7 @@ public class CPGenerator {
     private void analyzeNextNode(ASTNode n) {
         containsLastReturnVoid = false;
         if(n.getNodeClass().equals(ASTClass.ASSIGN)){
+            if(assignGlobal(n.getLeft().getName())) insertByte(InsSet.ALOAD_0.bytes);
             analyzeNextNode(n.getRight());
             setVar(n.getLeft().getName());
         }
@@ -675,19 +676,25 @@ public class CPGenerator {
 
     // VAR - SET
     private void setVar(String var){
-        int id = getStackID(var);
-        if(id != 0){
-            insertByte(getIStore(id));
-            if(id > 3){
-                insertByte((byte) id);
-            }
+        STObject stObjectGlobal = isGlobal(var);
+        if(stObjectGlobal != null){
+            insertByte(InsSet.PUTFIELD.bytes);
+            insertShort(getRef(stObjectGlobal.getName()));
         }else{
-            id = stackSafes.size()+1;
-            insertByte(getIStore(id));
-            if(id > 3){
-                insertByte((byte) id);
+            int id = getStackID(var);
+            if(id != 0){
+                insertByte(getIStore(id));
+                if(id > 3){
+                    insertByte((byte) id);
+                }
+            }else{
+                id = stackSafes.size()+1;
+                insertByte(getIStore(id));
+                if(id > 3){
+                    insertByte((byte) id);
+                }
+                stackSafes.add(new StackSafe(id, var));
             }
-            stackSafes.add(new StackSafe(id, var));
         }
     }
 
@@ -714,6 +721,13 @@ public class CPGenerator {
 
     private STObject isGlobal(String varName){
         return findFGNode(varName, ast.getVars().getNodes());
+    }
+
+    private boolean assignGlobal(String varName){
+        if(findFGNode(varName, ast.getVars().getNodes()) != null){
+            return true;
+        }
+        return false;
     }
 
     private STObject findFGNode(String varName, List<ASTNode> nodes){
