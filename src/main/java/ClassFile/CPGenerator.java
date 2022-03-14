@@ -620,45 +620,42 @@ public class CPGenerator {
 
     // BINOP - setOperator
     private void setOperator(ASTNode n) {
+        decreaseStack();
         if(n.getNodeSubclass().equals(TokenType.PLUS)) {                // +
             insertByte(InsSet.IADD.bytes);
-            decreaseStack();
         }
         else if(n.getNodeSubclass().equals(TokenType.MINUS)) {          // -
             insertByte(InsSet.ISUB.bytes);
-            decreaseStack();
         }
         else if(n.getNodeSubclass().equals(TokenType.TIMES)) {          // *
             insertByte(InsSet.IMUL.bytes);
-            decreaseStack();
         }
         else if(n.getNodeSubclass().equals(TokenType.SLASH)) {          // /
             insertByte(InsSet.IDIV.bytes);
-            decreaseStack();
         }
         else if(n.getNodeSubclass().equals(TokenType.EQUAL)) {          // ==  -> !=
             insertByte(InsSet.IFICMPNE.bytes);
-            decreaseDoubleStack();
+            decreaseStack();
         }
         else if(n.getNodeSubclass().equals(TokenType.NEQUAL)) {         // !=  -> ==
             insertByte(InsSet.IFICMPEQ.bytes);
-            decreaseDoubleStack();
+            decreaseStack();
         }
         else if(n.getNodeSubclass().equals(TokenType.GREATER)) {        // >  -> <=
             insertByte(InsSet.IFICMPLE.bytes);
-            decreaseDoubleStack();
+            decreaseStack();
         }
         else if(n.getNodeSubclass().equals(TokenType.GR_EQ)) {          // >= -> <
             insertByte(InsSet.IFICMPLT.bytes);
-            decreaseDoubleStack();
+            decreaseStack();
         }
         else if(n.getNodeSubclass().equals(TokenType.SMALLER)) {        // <  -> >=
             insertByte(InsSet.IFICMPGE.bytes);
-            decreaseDoubleStack();
+            decreaseStack();
         }
         else if(n.getNodeSubclass().equals(TokenType.SM_EQ)) {          // <= -> >
             insertByte(InsSet.IFICMPGT.bytes);
-            decreaseDoubleStack();
+            decreaseStack();
         }
     }
 
@@ -872,8 +869,5 @@ public class CPGenerator {
         stackSize--;
     }
 
-    private void decreaseDoubleStack(){
-        stackSize--;stackSize--;
-    }
 
 }
