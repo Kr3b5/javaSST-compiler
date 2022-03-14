@@ -46,6 +46,9 @@ public class CPGenerator {
     private boolean containsReturnNode;
     private boolean containsLastReturnVoid;
 
+    private short maxStackSize;
+    private short stackSize;
+
     //debug
     boolean debugMode;
 
@@ -471,6 +474,7 @@ public class CPGenerator {
             stackSafes = new LinkedList<>();
             codeBuffer.clear();
             cur = 0;
+            stackSize = maxStackSize = 0;
 
             //getParameter
             int i = 1;
@@ -480,7 +484,6 @@ public class CPGenerator {
 
             //get Type for Return
             typeInt = methodroot.getObject().getSTType().equals(STType.INT);
-
             analyzeNextNode(methodroot.getLink());
 
             if(!typeInt && !containsLastReturnVoid) setReturn();
@@ -489,7 +492,7 @@ public class CPGenerator {
             codeBuffer.get(0, code, 0, code.length);
 
             short size = (short)(12 + cur);
-            Attribut classCode = new Attribut(codeIndex, size, (short)2, (short)1, cur, code, (short)0, null);
+            Attribut classCode = new Attribut(codeIndex, size, maxStackSize, (short)1, cur, code, (short)0, null);
 
             List<Attribut> attCode = new LinkedList<>();
             attCode.add(classCode);
@@ -619,33 +622,43 @@ public class CPGenerator {
     private void setOperator(ASTNode n) {
         if(n.getNodeSubclass().equals(TokenType.PLUS)) {                // +
             insertByte(InsSet.IADD.bytes);
+            decreaseStack();
         }
         else if(n.getNodeSubclass().equals(TokenType.MINUS)) {          // -
             insertByte(InsSet.ISUB.bytes);
+            decreaseStack();
         }
         else if(n.getNodeSubclass().equals(TokenType.TIMES)) {          // *
             insertByte(InsSet.IMUL.bytes);
+            decreaseStack();
         }
         else if(n.getNodeSubclass().equals(TokenType.SLASH)) {          // /
             insertByte(InsSet.IDIV.bytes);
+            decreaseStack();
         }
         else if(n.getNodeSubclass().equals(TokenType.EQUAL)) {          // ==  -> !=
             insertByte(InsSet.IFICMPNE.bytes);
+            decreaseDoubleStack();
         }
         else if(n.getNodeSubclass().equals(TokenType.NEQUAL)) {         // !=  -> ==
             insertByte(InsSet.IFICMPEQ.bytes);
+            decreaseDoubleStack();
         }
         else if(n.getNodeSubclass().equals(TokenType.GREATER)) {        // >  -> <=
             insertByte(InsSet.IFICMPLE.bytes);
+            decreaseDoubleStack();
         }
         else if(n.getNodeSubclass().equals(TokenType.GR_EQ)) {          // >= -> <
             insertByte(InsSet.IFICMPLT.bytes);
+            decreaseDoubleStack();
         }
         else if(n.getNodeSubclass().equals(TokenType.SMALLER)) {        // <  -> >=
             insertByte(InsSet.IFICMPGE.bytes);
+            decreaseDoubleStack();
         }
         else if(n.getNodeSubclass().equals(TokenType.SM_EQ)) {          // <= -> >
             insertByte(InsSet.IFICMPGT.bytes);
+            decreaseDoubleStack();
         }
     }
 
@@ -656,6 +669,7 @@ public class CPGenerator {
         if( cons == InsSet.BIPUSH.bytes ){
             insertByte((byte)z);
         }
+        increaseStack();
     }
 
     // VAR - SET
@@ -680,6 +694,7 @@ public class CPGenerator {
                 stackSafes.add(new StackSafe(id, var));
             }
         }
+        decreaseStack();
     }
 
     // VAR - LOAD
@@ -697,6 +712,7 @@ public class CPGenerator {
             insertByte(b);
             if(b == InsSet.ILOAD.bytes) insertByte((byte) getStackID(var));
         }
+        increaseStack();
     }
 
     private STObject isFinal(String varName){
@@ -842,10 +858,22 @@ public class CPGenerator {
         codeBuffer.putShort(index, cp);
     }
 
-    void insertByte(byte cp) {
+    private void insertByte(byte cp) {
         codeBuffer.put(cp);
         cur++;
     }
 
+    private void increaseStack(){
+        stackSize++;
+        if(stackSize > maxStackSize) maxStackSize = stackSize;
+    }
+
+    private void decreaseStack(){
+        stackSize--;
+    }
+
+    private void decreaseDoubleStack(){
+        stackSize--;stackSize--;
+    }
 
 }
