@@ -475,6 +475,7 @@ public class CPGenerator {
             codeBuffer.clear();
             cur = 0;
             stackSize = maxStackSize = 0;
+            short locals = (short) (methodroot.getObject().getSymtab().getObjects().size() + 1);
 
             //getParameter
             int i = 1;
@@ -492,7 +493,7 @@ public class CPGenerator {
             codeBuffer.get(0, code, 0, code.length);
 
             short size = (short)(12 + cur);
-            Attribut classCode = new Attribut(codeIndex, size, maxStackSize, (short)1, cur, code, (short)0, null);
+            Attribut classCode = new Attribut(codeIndex, size, maxStackSize, locals, cur, code, (short)0, null);
 
             List<Attribut> attCode = new LinkedList<>();
             attCode.add(classCode);
