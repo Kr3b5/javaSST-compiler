@@ -10,13 +10,9 @@ import java.io.FileNotFoundException;
 public class SymbolTableTest {
 
     // files
-    private static final String COMPLETE_TEST           = "./src/test/resources/pass_test/CompleteTest.jsst";
     private static final String FSU_TEST                = "./src/test/resources/pass_test/Test.java";
 
     // tests
-    @Test
-    public void NormalTest_complete(){ runOverFile(COMPLETE_TEST); }
-
     @Test
     public void FSUTest_complete(){ runOverFile(FSU_TEST); }
 

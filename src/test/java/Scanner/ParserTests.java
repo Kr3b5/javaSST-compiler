@@ -8,8 +8,6 @@ import java.io.FileNotFoundException;
 public class ParserTests {
 
     // normal cases
-    private static final String COMPLETE_TEST           = "./src/test/resources/pass_test/CompleteTest.jsst";
-    private static final String EMPTY_CLASS_TEST        = "./src/test/resources/pass_test/EmptyClass.jsst";
     private static final String FSU_TEST                = "./src/test/resources/pass_test/Test.java";
 
     // error cases
@@ -21,12 +19,6 @@ public class ParserTests {
 
 
     // normal tests
-    @Test
-    public void NormalTest_complete(){ runOverFile(COMPLETE_TEST); }
-
-    @Test
-    public void NormalTest_EmptyClass(){ runOverFile(EMPTY_CLASS_TEST); }
-
     @Test
     public void FSU_Test_complete(){ runOverFile(FSU_TEST); }
 

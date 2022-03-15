@@ -461,7 +461,7 @@ public class ClassGenerator {
 
 
         short size = (short)(12 + cur);
-        Attribut classCode = new Attribut(codeIndex, size, (short)2, (short)1, cur, code, (short)0, null);      //TODO Attributes
+        Attribut classCode = new Attribut(codeIndex, size, (short)2, (short)1, cur, code, (short)0, null);
         attCode.add(classCode);
 
         methods.get(0).setCountAttributes((short)1);
