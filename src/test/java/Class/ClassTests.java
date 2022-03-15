@@ -1,7 +1,7 @@
 package Class;
 
 import AbstractSyntaxTree.ASTPrinter;
-import ClassFile.ClassGenerator;
+import ClassFile.ClassWriter;
 import Helper.SemanticAnalyzer;
 import Parser.Parser;
 import org.junit.jupiter.api.Test;
@@ -20,7 +20,7 @@ public class ClassTests {
 
     @Test
     public void FSUTest_complete() throws FileNotFoundException {
-        runTest(FSU_TEST, true, false, true);
+        runTest(FSU_TEST, true, false, false);
     }
 
     @Test
@@ -37,9 +37,9 @@ public class ClassTests {
         if(DebugModeSA) semanticAnalyzer.setDebugMode(true);
         semanticAnalyzer.analyze(parser.getAst(), parser.getSymbolTable());
 
-        ClassGenerator classGenerator = new ClassGenerator(parser.getAst(), parser.getSymbolTable());
-        if(DebugModeCF) classGenerator.setDebugMode(true);
-        classGenerator.genClass();
+        ClassWriter classWriter = new ClassWriter(parser.getAst());
+        if(DebugModeCF) classWriter.setDebugMode(true);
+        classWriter.genClass();
     }
 
 }
