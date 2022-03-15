@@ -6,6 +6,8 @@ import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -42,14 +44,14 @@ public class ClassWriter {
 
     private List<Method> methods;
 
-    private List<Field> attributes;
 
 
     // globals
     private final AST ast;
 
     private byte[] code;
-    ByteBuffer buffer = ByteBuffer.allocate(65536); //TODO
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    DataOutputStream dos = new DataOutputStream(baos);
     private short sourcefile;
 
     //debug
@@ -61,7 +63,6 @@ public class ClassWriter {
         constantPool = new HashMap<>();
         fields = new LinkedList<>();
         methods = new LinkedList<>();
-        attributes = new LinkedList<>();
         debugMode = false;
     }
 
@@ -106,7 +107,6 @@ public class ClassWriter {
     //-----------------------------------------------------------------------------------------------------------------
 
     private byte[] genByteCode() {
-
         //u4 - add magic number
         insertInt(magicnumber);
 
@@ -114,7 +114,6 @@ public class ClassWriter {
         insertShort(minor);
         //u2 - major
         insertShort(major);
-
 
         //u2 - constant_pool_count +  constant_pool
         insertShort((short)(constantPool.size() + 1));
@@ -130,18 +129,20 @@ public class ClassWriter {
         //u2 - interfaces count
         insertShort(countInterfaces);
 
+        //Fields
         insertShort((short)fields.size());
         insertFields();
 
+        //Methods
         insertShort((short)methods.size());
         insertMethods();
 
-        //ATTRIBUTES
+        //Attributes
         insertAttributes();
 
         logger.info("Bytecode generated!");
 
-        return buffer.array();
+        return baos.toByteArray();
     }
 
 
@@ -290,7 +291,7 @@ public class ClassWriter {
         u4 attribute_length
         u2 sourcefile
     */
-    private void insertAttributes() {               //TODO
+    private void insertAttributes() {
         insertShort((short) 1);
         insertShort(sourcefile);
         insertInt(2);
@@ -301,23 +302,43 @@ public class ClassWriter {
     //-----------------------------------------------------------------------------------------------------------------
 
     void insertInt(int cp) {
-        buffer.putInt(cp);
+        try {
+            dos.writeInt(cp);
+        } catch (IOException e) {
+            logger.error(e.getMessage());
+        }
     }
 
     void insertShort(short cp) {
-        buffer.putShort(cp);
+        try {
+            dos.writeShort(cp);
+        } catch (IOException e) {
+            logger.error(e.getMessage());
+        }
     }
 
     void insertByte(byte cp) {
-        buffer.put(cp);
+        try {
+            dos.writeByte(cp);
+        } catch (IOException e) {
+            logger.error(e.getMessage());
+        }
     }
 
     void insertByteArray(byte[] cp) {
-        buffer.put(cp);
+        try {
+            dos.write(cp);
+        } catch (IOException e) {
+            logger.error(e.getMessage());
+        }
     }
 
     void insertString(String s) {
-        buffer.put(s.getBytes());
+        try {
+            dos.write(s.getBytes());
+        } catch (IOException e) {
+            logger.error(e.getMessage());
+        }
     }
 
 
