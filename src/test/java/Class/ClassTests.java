@@ -35,11 +35,13 @@ public class ClassTests {
         if(printAST) printer.printDot(parser.getAst());
 
         if(DebugModeSA) semanticAnalyzer.setDebugMode(true);
-        semanticAnalyzer.analyze(parser.getAst(), parser.getSymbolTable());
+        boolean errorFound = semanticAnalyzer.analyze(parser.getAst(), parser.getSymbolTable());
 
-        ClassWriter classWriter = new ClassWriter(parser.getAst());
-        if(DebugModeCF) classWriter.setDebugMode(true);
-        classWriter.genClass();
+        if(!errorFound){
+            ClassWriter classWriter = new ClassWriter(parser.getAst());
+            if(DebugModeCF) classWriter.setDebugMode(true);
+            classWriter.genClass();
+        }
     }
 
 }
