@@ -32,6 +32,8 @@ public class ASTPrinter {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        logger.info("Dot file generated!");
     }
 
     private void createDotFile() throws IOException {
