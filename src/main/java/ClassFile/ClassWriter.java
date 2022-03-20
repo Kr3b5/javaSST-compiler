@@ -27,7 +27,7 @@ public class ClassWriter {
 
     // classfile
     private final int magicnumber = 0xCAFEBABE;
-    private final short major = 59;                     // Java 8 = 52 (0x34)| Java 15 = 59 (0x3B)
+    private final short major = 52;                     // Java 8 = 52 (0x34)| Java 15 = 59 (0x3B)
     private final short minor = 0;
 
     private short this_class;
