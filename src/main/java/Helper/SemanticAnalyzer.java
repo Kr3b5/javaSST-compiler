@@ -9,21 +9,19 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.LinkedList;
+import java.util.List;
 
-/*  TODO:   Variablen müssen Wert haben
- *  TODO:   Konstantenfaltung
- *  TODO:   Expression abfangen ( if bool )
-*/
 
 /**
  *  Tests:
  *      - ist die Variable initialisiert
  *      - INT Methoden enden auf RETURN (IF am Ende, dann RETURN im IF und ELSE Zweig)
  *      - FINAL Variablen dürfen nicht neu ASSIGNED werden
- *      - WHILE benötigt BOOL Bedingung
+ *      - WHILE + IF benötigt BOOL Bedingung
+ *      - VAR has Values (nullcheck)
  *
- *
- *      Deadcode --> wird durch Parser abgefangen
+ *      init in IF-ELSE-WHILE -> durch Sprachbeschreibugn abgefangen
+ *      Deadcode -> wird durch Parser abgefangen
  */
 
 public class SemanticAnalyzer {
@@ -57,6 +55,11 @@ public class SemanticAnalyzer {
 
             checkMethodReturn(method);
             checkallNodes(method);
+
+            //get init values
+            actualCheck = "VarHasValue";
+            List<String> list = getInitValues(st.getObjects().get(0).getSymtab(), method.getObject());
+            checkVarValue(method, list);
         }
         logSummary();
         return errorFound;
@@ -183,6 +186,97 @@ public class SemanticAnalyzer {
                 }
             }
         }
+    }
+
+    //-------------------------------------------------------------------------------------------------------
+
+    private void checkVarValue(ASTNode node, List<String> list) {
+        if(node.getNodeClass() != null && node.getNodeClass().equals(ASTClass.VAR)){
+            if(node.getName()!= null) hasValue(node.getName(), list);
+        }
+
+        if(node.getNodeClass() != null && node.getNodeClass().equals(ASTClass.PROD)){
+            checkParameterValue(node.getObject().getSymtab(), list);
+        }
+
+        if (node.getNodeClass() != null && node.getNodeClass().equals(ASTClass.ASSIGN) ){
+            //add right Var
+            if(!list.contains(node.getLeft().getName())) list.add(node.getLeft().getName());
+
+            //check right side
+            checkVarValue(node.getRight(), list);
+        }
+
+        if (node.getNodeClass() != null && node.getNodeClass().equals(ASTClass.IF_ELSE)  ){
+            //If Condition Check
+            checkVarValue(node.getLeft().getLeft(), list);
+
+            //If Statements with new List
+            checkVarValue(node.getLeft().getRight(), new LinkedList<>(list));
+
+            //Else Statements with new List
+            checkVarValue(node.getRight(), new LinkedList<>(list));
+        }
+
+        if (node.getNodeClass() != null && node.getNodeClass().equals(ASTClass.WHILE)){
+            //While Condition Check
+            checkVarValue(node.getLeft(), list );
+
+            //While Statements with new List
+            checkVarValue(node.getRight(), new LinkedList<>(list) );
+        }
+
+        if (node.getNodeClass() != null && node.getNodeClass().equals(ASTClass.BINOP)){     //check left and right side of BINOP
+            checkVarValue(node.getLeft(), list );
+            checkVarValue(node.getRight(), list );
+        }
+        if (node.getNodeClass() != null && node.getNodeClass().equals(ASTClass.RETURN)){     //check Return
+            if(node.getLeft() != null) checkVarValue(node.getLeft(), list );
+        }
+
+
+        if (node.getLink() != null) {
+            checkVarValue(node.getLink(), list);
+        }
+    }
+
+    private void checkParameterValue(SymbolTable symtab, List<String> list) {
+        for (STObject s: symtab.getObjects()) {
+            if(s.getObjClass().equals(ObjClass.PAR)){
+                hasValue(s.getName(), list);
+            }else if(s.getObjClass().equals(ObjClass.PROC)){
+                checkParameterValue(s.getSymtab(), list);
+            }
+        }
+    }
+
+
+    private void hasValue(String name, List<String> list) {
+        if(!list.contains(name)){
+            logError("Error! Var " + name+ " is null");
+            errorFound = true;
+        }else{
+            logInfo("Var " + name + " has value");
+        }
+
+    }
+
+
+    private LinkedList<String> getInitValues(SymbolTable symbolTable, STObject method){
+        LinkedList<String> objList = new LinkedList<>();
+        //finals
+        for (STObject obj : symbolTable.getObjects()) {
+            if( obj.getObjClass().equals(ObjClass.CONST) ){
+                objList.add(obj.getName());
+            }
+        }
+        // parameter
+        for (STObject obj : method.getSymtab().getObjects() ){
+            if( obj.getObjClass().equals(ObjClass.PAR) ){
+                objList.add(obj.getName());
+            }
+        }
+        return objList;
     }
 
     //-------------------------------------------------------------------------------------------------------
