@@ -125,7 +125,7 @@ public class ClassGenerator {
     private void genPoolClass() {
         classIndex = countConstantPool;
         addToPool(new CPConstant((byte) CPTypes.CLASS.value, (short) (countConstantPool + 1)));
-        methods.add(new Method((short)0, countConstantPool, (short) 6, (short) 0, null));
+        methods.add(new Method((short)1, (short) 5, (short) 6, (short) 0, null));
         addToPool(new CPConstant((byte) CPTypes.UTF8.value, (short) ast.getObject().getName().length(), ast.getObject().getName()));
     }
 
