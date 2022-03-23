@@ -17,29 +17,40 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-
-
-
 ### Built With
 
-* [Java 17](https://www.java.com/en/)
+* [Java 15](https://openjdk.java.net/)
 * [Maven](https://maven.apache.org/)
 
 
 <!-- GETTING STARTED -->
 ## Getting Started
 
+Build the project with `mvn clean package`
 
-
-### Prerequisites
-
-
-### Installation
-
+This generates two .jar files in `./target`: 
+* `FSUCompiler-1.0.jar` - Compiler with dependencies 
+* `original-FSUCompile-1.0.jar` - Compiler without dependencies
 
 
 <!-- USAGE EXAMPLES -->
 ## Usage
+
+```
+java -jar FSUCompile-1.0.jar <java-file> <options>
+
+Valid options:
+    -dot : Print Dot File
+    -debug: print Debug
+```
+
+To convert the .dot file to png use [Graphviz](https://graphviz.org/):
+
+`dot -Tpng <filename>.dot -o <filename>.png`
+
+**Example Output:**
+
+![ast](/assets/example_ast.png)
 
 
 <!-- LICENSE -->
@@ -53,12 +64,6 @@ Distributed under the MIT License. See `LICENSE.txt` for more information.
 * [Kr3b5](https://gitlab.com/Kr3b5)
 
 
-<!-- ACKNOWLEDGMENTS -->
-## Acknowledgments
-
-* []()
-* []()
-* []()
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
