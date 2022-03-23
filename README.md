@@ -55,13 +55,13 @@ To convert the .dot file to png use [Graphviz](https://graphviz.org/):
 
 <!-- LICENSE -->
 ## License
-Distributed under the MIT License. See `LICENSE.txt` for more information.
+Distributed under the MIT License. See `LICENSE` for more information.
 
 
 <!-- CONTACT -->
 ## Contact
 
-* [Kr3b5](https://gitlab.com/Kr3b5)
+* [Kr3b5](https://github.com/Kr3b5)
 
 
 
