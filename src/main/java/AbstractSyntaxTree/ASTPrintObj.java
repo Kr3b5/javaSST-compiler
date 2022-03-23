@@ -3,6 +3,11 @@ package AbstractSyntaxTree;
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * Print object from AST
+ *
+ * @author Kr3b5
+ */
 public class ASTPrintObj {
 
     private int ID;

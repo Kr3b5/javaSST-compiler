@@ -34,7 +34,6 @@ public class Input implements Iterator<Character> {
     /**
      * Read new char in buffer and return old buffer
      *
-     * @throws IOException Exception - cannot read next char
      * @return char in buffer
      */
     @Override

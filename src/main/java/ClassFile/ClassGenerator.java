@@ -12,7 +12,12 @@ import org.apache.logging.log4j.Logger;
 import java.nio.ByteBuffer;
 import java.util.*;
 
-// https://docs.oracle.com/javase/specs/jvms/se15/html/jvms-4.html#jvms-4.4
+/**
+ * Generator for class code
+ * https://docs.oracle.com/javase/specs/jvms/se15/html/jvms-4.html#jvms-4.4
+ *
+ * @author Kr3b5
+ */
 public class ClassGenerator {
 
     /**
@@ -74,15 +79,20 @@ public class ClassGenerator {
     public short getSuperclassIndex() { return superclassIndex; }
     public short getSourcefileIndex() { return sourcefileIndex; }
     public HashMap<Short, CPConstant> getConstantPool() { return constantPool;}
-    // METHODS
 
+
+    /**
+     * Generate Constant Pool + Code
+     */
     public void generate(){
         genConstantPool();
         genCode();
     }
 
 
-
+    /**
+     * Generate Constant Pool
+     */
     public void genConstantPool() {
         genPoolHead();
         genPoolClass();
@@ -105,6 +115,9 @@ public class ClassGenerator {
       #5 = Utf8               <init>
       #6 = Utf8               ()V
     */
+    /**
+     * generate Constantpool part - head
+     */
     private void genPoolHead() {
         addToPool(new CPConstant((byte) CPTypes.METHOD.value, (short) 2, (short) 3));
         superclassIndex = countConstantPool;
@@ -122,6 +135,9 @@ public class ClassGenerator {
       #7 = Class              #8             // EmptyClass
       #8 = Utf8               EmptyClass
     */
+    /**
+     * generate Constantpool part - class
+     */
     private void genPoolClass() {
         classIndex = countConstantPool;
         addToPool(new CPConstant((byte) CPTypes.CLASS.value, (short) (countConstantPool + 1)));
@@ -134,6 +150,9 @@ public class ClassGenerator {
         #9 = NameAndType        #11:#12        // fvar1:I
         #11 = Utf8               fvar1
         #12 = Utf8               I
+     */
+    /**
+     * generate Constantpool part - finals
      */
     private void genPoolFinals() {
         field_ref = new LinkedList<>();
@@ -174,6 +193,9 @@ public class ClassGenerator {
         #20 = Fieldref           #8.#21         // ClassTest2.dyn1:I
         #21 = NameAndType        #22:#12        // dyn1:I
         #22 = Utf8               dyn1
+     */
+    /**
+     * generate Constantpool part - called VAR + METHODS
      */
     private void genPoolCalls() {
         ASTNodeContainer methodsList = ast.getMethods();
@@ -220,7 +242,9 @@ public class ClassGenerator {
     }
 
 
-
+    /**
+     * Find called VAR + PROD
+     */
     private void findNextCalledNode(ASTNode node){
         if(node.getNodeClass().equals(ASTClass.VAR) ||
                 node.getNodeClass().equals(ASTClass.PROD)){
@@ -242,6 +266,9 @@ public class ClassGenerator {
         }
     }
 
+    /**
+     * Find called subnodes (Symboltable)
+     */
     private void findNextCalledSubNodes(SymbolTable st){
         for (STObject stObject: st.getObjects()) {
             if(stObject.getObjClass().equals(ObjClass.PROC)){
@@ -257,6 +284,9 @@ public class ClassGenerator {
     /*
          #30 = Utf8               ConstantValue
          #31 = Integer            1
+     */
+    /**
+     * generate Constantpool part - Constant values
      */
     private void genPoolConstants(){
         ASTNodeContainer finals = ast.getFinals();
@@ -279,6 +309,12 @@ public class ClassGenerator {
         }
     }
 
+    /*
+         #40 = Utf8               var1
+    */
+    /**
+     * generate Constantpool part - not called VAR
+     */
     private void genNotCalledVars(){
         ASTNodeContainer globals = ast.getVars();
         for (ASTNode n : globals.getNodes()) {
@@ -297,6 +333,9 @@ public class ClassGenerator {
        #9 = Utf8               Code
       #10 = Utf8               LineNumberTable
      */
+    /**
+     * generate Constantpool part - Code head
+     */
     private void genPoolCodeHead() {
         String c = "Code";
         codeIndex = countConstantPool;
@@ -305,6 +344,13 @@ public class ClassGenerator {
         addToPool(new CPConstant((byte) CPTypes.UTF8.value, (short) lnt.length(), lnt));
     }
 
+    /*
+     #40 = Utf8               meth1
+     #41 = Utf8               (I)V
+    */
+    /**
+     * generate Constantpool part - not called methods
+     */
     private void genPoolCodeBody() {
         ASTNodeContainer methodList = ast.getMethods();
         for (ASTNode n : methodList.getNodes()) {
@@ -323,6 +369,9 @@ public class ClassGenerator {
       #11 = Utf8               SourceFile
       #12 = Utf8               EmptyClass.java
      */
+    /**
+     * generate Constantpool part - end
+     */
     private void genPoolEnd() {
         String sf = "SourceFile";
         String name = ast.getObject().getName() + ".java";
@@ -333,13 +382,20 @@ public class ClassGenerator {
 
 
     // HELPER
-
+    /**
+     * Add to Constant Pool
+     * @param c Constantpoolconstant
+     */
     private void addToPool(CPConstant c) {
         constantPool.put(countConstantPool, c);
         countConstantPool++;
     }
 
-
+    /**
+     * Find parameterkey from method
+     * @param value name
+     * @return parameterkey
+     */
     private Short getKeyByStringValue(String value) {
         for (Map.Entry<Short,CPConstant> entry : constantPool.entrySet()) {
             if (entry.getValue().getsValue() != null && value.equals(entry.getValue().getsValue())) {
@@ -349,6 +405,11 @@ public class ClassGenerator {
         return 0;
     }
 
+    /**
+     * generate parameterkey from method
+     * @param n methodnode
+     * @return paramterkey
+     */
     private String getPKey(ASTNode n){
         int cInts = 0;
         for (STObject obj : n.getObject().getSymtab().getObjects()) {
@@ -369,7 +430,9 @@ public class ClassGenerator {
     }
 
     // DEBUG
-    
+    /**
+     * Debug - print Constantpool
+     */
     private void printConstantPool(){
         logger.info("Constant Pool");
         int count = 1;
@@ -404,14 +467,21 @@ public class ClassGenerator {
         }
     }
 
+    //------------------------------------------------------------------------------------------------------------------
     // CODEGEN
 
+    /**
+     * generate method code
+     */
     public void genCode(){
         addMethods();
         genClassCode();
         genMethodCode();
     }
 
+    /**
+     * Add methods to list
+     */
     private void addMethods() {
         ASTNodeContainer methodsList = ast.getMethods();
         for (ASTNode n : methodsList.getNodes()) {
@@ -422,7 +492,9 @@ public class ClassGenerator {
         }
     }
 
-
+    /**
+     * generate classcode
+     */
     private void genClassCode(){
         codeBuffer.clear();
         cur = 0;
@@ -468,7 +540,9 @@ public class ClassGenerator {
         methods.get(0).setAttributes(attCode);
     }
 
-
+    /**
+     * generate methodcode
+     */
     private void genMethodCode(){
         for (ASTNode methodroot : ast.getMethods().getNodes()) {
             stackSafes = new LinkedList<>();
@@ -485,6 +559,8 @@ public class ClassGenerator {
 
             //get Type for Return
             typeInt = methodroot.getObject().getSTType().equals(STType.INT);
+
+            //analyze all Subnodes
             analyzeNextNode(methodroot.getLink());
 
             if(!typeInt && !containsLastReturnVoid) setReturn();
@@ -504,6 +580,11 @@ public class ClassGenerator {
         }
     }
 
+    /**
+     * find methodindex in list methods
+     * @param methodName Name of method
+     * @return index
+     */
     private int getMethodsIndex(String methodName){
         int index = 0;
         for (Method m: methods) {
@@ -515,10 +596,19 @@ public class ClassGenerator {
         return 0;
     }
 
+    /**
+     * Find UTF-8 entry by index
+     * @param index CP index
+     * @return string value
+     */
     private String getCPNamebyIndex(short index){
         return constantPool.get(index).getsValue();
     }
 
+    /**
+     * Generate code from node
+     * @param n node
+     */
     private void analyzeNextNode(ASTNode n) {
         containsLastReturnVoid = false;
         if(n.getNodeClass().equals(ASTClass.ASSIGN)){
@@ -555,7 +645,10 @@ public class ClassGenerator {
         if(n.getLink() != null) analyzeNextNode(n.getLink());
     }
 
-    //WHILE
+    /**
+     * Generate while
+     * @param n node
+     */
     private void setWhile(ASTNode n) {
         int posBegin = cur;
         int posEnd;
@@ -576,7 +669,10 @@ public class ClassGenerator {
         replaceShort(posEnd, (short)(cur - (posEnd-1)));
     }
 
-    // IFELSE
+    /**
+     * Generate IF-ELSE
+     * @param n node
+     */
     private void setIfElse(ASTNode n) {
         int posElse;
         int posEnd = 0;
@@ -610,7 +706,9 @@ public class ClassGenerator {
         if(!containsReturnNode) replaceShort(posEnd, (short)(cur - (posEnd-1)));
     }
 
-    // RETURN
+    /**
+     * set return code
+     */
     private void setReturn() {
         if(typeInt){
             insertByte(InsSet.IRETURN.bytes);
@@ -619,7 +717,10 @@ public class ClassGenerator {
         }
     }
 
-    // BINOP - setOperator
+    /**
+     * set BINOP code
+     * @param n node
+     */
     private void setOperator(ASTNode n) {
         decreaseStack();
         if(n.getNodeSubclass().equals(TokenType.PLUS)) {                // +
@@ -660,7 +761,10 @@ public class ClassGenerator {
         }
     }
 
-    // INT - SET
+    /**
+     * set INT
+     * @param z value
+     */
     private void setInt(int z){
         byte cons = getConst(z);
         insertByte(cons);
@@ -670,7 +774,10 @@ public class ClassGenerator {
         increaseStack();
     }
 
-    // VAR - SET
+    /**
+     * set VAR - save
+     * @param var name
+     */
     private void setVar(String var){
         STObject stObjectGlobal = isGlobal(var);
         if(stObjectGlobal != null){
@@ -695,7 +802,10 @@ public class ClassGenerator {
         decreaseStack();
     }
 
-    // VAR - LOAD
+    /**
+     * load VAR
+     * @param var name
+     */
     private void loadVar(String var){
         STObject stObjectFinal = isFinal(var);
         STObject stObjectGlobal = isGlobal(var);
@@ -713,18 +823,39 @@ public class ClassGenerator {
         increaseStack();
     }
 
+    /**
+     * test if VAR is final
+     * @param varName name
+     * @return Symboltableobject
+     */
     private STObject isFinal(String varName){
         return findFGNode(varName, ast.getFinals().getNodes());
     }
 
+    /**
+     * test if VAR is global
+     * @param varName name
+     * @return Symboltableobject
+     */
     private STObject isGlobal(String varName){
         return findFGNode(varName, ast.getVars().getNodes());
     }
 
+    /**
+     * test if VAR is global
+     * @param varName name
+     * @return true/false
+     */
     private boolean assignGlobal(String varName){
         return findFGNode(varName, ast.getVars().getNodes()) != null;
     }
 
+    /**
+     * Find Node
+     * @param varName name
+     * @param nodes list of nodes
+     * @return Symboltableobject
+     */
     private STObject findFGNode(String varName, List<ASTNode> nodes){
         for (ASTNode n : nodes) {
             if(varName.equals(n.getObject().getName())){
@@ -734,6 +865,11 @@ public class ClassGenerator {
         return null;
     }
 
+    /**
+     * get id from VAR Safe
+     * @param var name
+     * @return index
+     */
     private int getStackID(String var){
         for (StackSafe s : stackSafes) {
             if(s.getVar().equals(var)){
@@ -749,8 +885,10 @@ public class ClassGenerator {
     11: iload_3
     12: invokevirtual #25                 // Method meth2:(II)I
      */
-
-    // PROD - CALL
+    /**
+     * generate PROD code
+     * @param n node
+     */
     private void callProd(ASTNode n){
         //ALOAD
         int countMeth = getCountMethods(n.getObject().getSymtab());
@@ -764,6 +902,10 @@ public class ClassGenerator {
         insertShort(getRef(n.getName()));
     }
 
+    /**
+     * generate parameter from PROD call
+     * @param st symboltable
+     */
     private void stToByteCode(SymbolTable st){
         for (STObject stObject: st.getObjects()) {
             if(stObject.getObjClass().equals(ObjClass.PROC)){
@@ -778,11 +920,20 @@ public class ClassGenerator {
         }
     }
 
+    /**
+     * get reference from UTF-8
+     * @param varname name
+     * @return Index
+     */
     private short getRef(String varname){
         return getRefKeyByNameandType(getKeyByStringValue(varname));
     }
 
-
+    /**
+     * get reference from NameAndType
+     * @param index NameAndType index
+     * @return Index
+     */
     private Short getRefKeyByNameandType(short index) {
         short refindex = 0;
         for (Map.Entry<Short,CPConstant> entry : constantPool.entrySet()) {
@@ -798,12 +949,21 @@ public class ClassGenerator {
         return refindex;
     }
 
+    /**
+     * get method count
+     * @param st symboltable
+     * @return count
+     */
     private int getCountMethods(SymbolTable st){
         countMethods = 1;
         getObjects(st);
         return countMethods;
     }
 
+    /**
+     * iterate over objects and count methods
+     * @param st symboltable
+     */
     private void getObjects(SymbolTable st){
         for (STObject stObject: st.getObjects()) {
             if(stObject.getObjClass().equals(ObjClass.PROC)){
@@ -813,7 +973,11 @@ public class ClassGenerator {
         }
     }
 
-
+    /**
+     * get instruction CONST
+     * @param z value
+     * @return bytecode
+     */
     private byte getConst(int z){
         return switch (z) {
             case 0 -> InsSet.ICONST_0.bytes;
@@ -826,6 +990,11 @@ public class ClassGenerator {
         };
     }
 
+    /**
+     * get instruction STORE
+     * @param z value
+     * @return bytecode
+     */
     private byte getIStore(int z){
         return switch (z) {
             case 0 -> InsSet.ISTORE_0.bytes;
@@ -836,6 +1005,11 @@ public class ClassGenerator {
         };
     }
 
+    /**
+     * get instruction LOAD
+     * @param id id
+     * @return bytecode
+     */
     private byte getILoad(int id){
         return switch (id) {
             case 0 -> InsSet.ILOAD_0.bytes;
@@ -846,26 +1020,44 @@ public class ClassGenerator {
         };
     }
 
-
+    /**
+     * insert short into code
+     * @param cp codepart
+     */
     private void insertShort(short cp) {
         codeBuffer.putShort(cp);
         cur = cur + 2;
     }
 
+    /**
+     * replace short in code
+     * @param index index
+     * @param cp codepart
+     */
     private void replaceShort(int index, short cp) {
         codeBuffer.putShort(index, cp);
     }
 
+    /**
+     * insert byte into code
+     * @param cp codepart
+     */
     private void insertByte(byte cp) {
         codeBuffer.put(cp);
         cur++;
     }
 
+    /**
+     * increase stack count and test max_stack_size
+     */
     private void increaseStack(){
         stackSize++;
         if(stackSize > maxStackSize) maxStackSize = stackSize;
     }
 
+    /**
+     * decrease stack count
+     */
     private void decreaseStack(){
         stackSize--;
     }

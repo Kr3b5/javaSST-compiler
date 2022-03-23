@@ -9,6 +9,11 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * Printer for dot files
+ *
+ * @author Kr3b5
+ */
 public class ASTPrinter {
 
     /**
@@ -20,6 +25,10 @@ public class ASTPrinter {
     private BufferedWriter writer;
     private String filename;
 
+    /**
+     * pritn dot file
+     * @param ast AST
+     */
     public void printDot(AST ast){
 
         extractNodestoList(ast);
@@ -36,18 +45,32 @@ public class ASTPrinter {
         logger.info("Dot file generated!");
     }
 
+    /**
+     * create file
+     * @throws IOException file creation error
+     */
     private void createDotFile() throws IOException {
         writer = new BufferedWriter(new FileWriter(filename + ".dot"));
         writer.write("digraph " + filename + " {");
         writer.newLine();
     }
 
+    /**
+     * write to file
+     * @throws IOException write error
+     */
     private void endDotFile() throws IOException {
         writer.write("}");
         writer.close();
     }
 
-    // 1685538367[label="var1"];
+    /**
+     * write nodes
+     *
+     * 1685538367[label="var1"];
+     *
+     * @throws IOException write error
+     */
     private void writeNodes() throws IOException {
         for (ASTPrintObj obj: printObjs) {
                     writer.write(obj.getID() + "[label=\"" + obj.getFirstline() );
@@ -61,7 +84,11 @@ public class ASTPrinter {
 
     }
 
-
+    /**
+     * write connections between nodes
+     *
+     * @throws IOException write error
+     */
     private void writeConnections() throws IOException {
         for (ASTPrintObj obj: printObjs) {
 
@@ -88,8 +115,11 @@ public class ASTPrinter {
 
     }
 
-
-
+    /**
+     * extract nodes from AST to list
+     *
+     * @param ast AST
+     */
     private void extractNodestoList(AST ast){
         ASTNodeContainer finals = ast.getFinals();
         ASTNodeContainer vars = ast.getVars();
@@ -141,6 +171,11 @@ public class ASTPrinter {
         debugPrintObjects();
     }
 
+    /**
+     * iterate trough nodes
+     *
+     * @param node next node
+     */
     private void getNextNodes(ASTNode node){
         ASTPrintObj printObj = new ASTPrintObj(node.getId(), node.getNodeClass().name());
         
@@ -168,6 +203,9 @@ public class ASTPrinter {
         printObjs.add(printObj);
     }
 
+    /**
+     * DEBUG - print objects
+     */
     private void debugPrintObjects(){
         for (ASTPrintObj obj : printObjs) {
             logger.debug("[ " + obj.getID() + " | "

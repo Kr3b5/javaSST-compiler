@@ -10,13 +10,17 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
-// https://docs.oracle.com/javase/specs/jvms/se15/html/jvms-4.html
 
+/**
+ * Writer for class file
+ * https://docs.oracle.com/javase/specs/jvms/se15/html/jvms-4.html
+ *
+ * @author Kr3b5
+ */
 @SuppressWarnings("FieldCanBeLocal")
 public class ClassWriter {
 
@@ -70,6 +74,10 @@ public class ClassWriter {
         this.debugMode = debugMode;
     }
 
+
+    /**
+     * generate .class file
+     */
     public void genClass() {
 
         //generate ConstantPool
@@ -85,6 +93,10 @@ public class ClassWriter {
         writeByteCodeToFile();
     }
 
+    /**
+     * get parameter from generator
+     * @param classGenerator generator
+     */
     private void getCPValues(ClassGenerator classGenerator) {
         constantPool = classGenerator.getConstantPool();
         this_class = classGenerator.getClassIndex();
@@ -94,6 +106,9 @@ public class ClassWriter {
         methods = classGenerator.getMethods();
     }
 
+    /**
+     * write bytecode to file
+     */
     private void writeByteCodeToFile() {
         String filename = ast.getObject().getName() + ".class";
         try {
@@ -106,6 +121,10 @@ public class ClassWriter {
 
     //-----------------------------------------------------------------------------------------------------------------
 
+    /**
+     * generate bytecode
+     * @return code
+     */
     private byte[] genByteCode() {
         //u4 - add magic number
         insertInt(magicnumber);
@@ -145,7 +164,9 @@ public class ClassWriter {
         return baos.toByteArray();
     }
 
-
+    /**
+     * generate bytecode from Constantpool
+     */
     private void genByteCodeFromCP(){
         for (CPConstant c: constantPool.values()) {
             byte type = c.getType();
@@ -192,13 +213,16 @@ public class ClassWriter {
         }
     }
 
-    /*  https://docs.oracle.com/javase/specs/jvms/se15/html/jvms-4.html#jvms-4.5
-        u2             access_flags;
-        u2             name_index;
-        u2             descriptor_index;
-        u2             attributes_count;
-        attribute_info attributes[attributes_count];
-    */
+    /**
+     * insert fields into code
+     *
+     * https://docs.oracle.com/javase/specs/jvms/se15/html/jvms-4.html#jvms-4.5
+     *      u2             access_flags;
+     *      u2             name_index;
+     *      u2             descriptor_index;
+     *      u2             attributes_count;
+     *      attribute_info attributes[attributes_count];
+     */
     private void insertFields() {
         for (Field f : fields) {
             insertShort(f.getAccessFlag());
@@ -215,20 +239,22 @@ public class ClassWriter {
         }
     }
 
-     /* https://docs.oracle.com/javase/specs/jvms/se15/html/jvms-4.html#jvms-4.6
-        u2             access_flags;
-        u2             name_index;
-        u2             descriptor_index;
-        u2             attributes_count;
-        attribute_info attributes[attributes_count];
-    */
+    /**
+     * insert methods into code
+     *
+     * https://docs.oracle.com/javase/specs/jvms/se15/html/jvms-4.html#jvms-4.6
+     *      u2             access_flags;
+     *      u2             name_index;
+     *      u2             descriptor_index;
+     *      u2             attributes_count;
+     *      attribute_info attributes[attributes_count];
+     */
     private void insertMethods() {
         for (Method m : methods) {
             insertShort(m.getAccessFlag());
             insertShort(m.getNameIndex());
             insertShort(m.getSignatureIndex());
             insertShort(m.getCountAttributes());
-
 
             if(m.getAttributes() != null ){
                 /* https://docs.oracle.com/javase/specs/jvms/se15/html/jvms-4.html#jvms-4.7.3
@@ -284,13 +310,15 @@ public class ClassWriter {
         }
     }
 
-
-    /*  https://docs.oracle.com/javase/specs/jvms/se15/html/jvms-4.html#jvms-4.7
-        u2 attributes_count
-        u2 attribute_name_index
-        u4 attribute_length
-        u2 sourcefile
-    */
+    /**
+     * insert attributes into code
+     *
+     * https://docs.oracle.com/javase/specs/jvms/se15/html/jvms-4.html#jvms-4.7
+     *      u2 attributes_count
+     *      u2 attribute_name_index
+     *      u4 attribute_length
+     *      u2 sourcefile
+     */
     private void insertAttributes() {
         insertShort((short) 1);
         insertShort(sourcefile);
@@ -301,6 +329,10 @@ public class ClassWriter {
 
     //-----------------------------------------------------------------------------------------------------------------
 
+    /**
+     * insert int into code
+     * @param cp codepart
+     */
     void insertInt(int cp) {
         try {
             dos.writeInt(cp);
@@ -309,6 +341,10 @@ public class ClassWriter {
         }
     }
 
+    /**
+     * insert short into code
+     * @param cp codepart
+     */
     void insertShort(short cp) {
         try {
             dos.writeShort(cp);
@@ -317,6 +353,10 @@ public class ClassWriter {
         }
     }
 
+    /**
+     * insert byte into code
+     * @param cp codepart
+     */
     void insertByte(byte cp) {
         try {
             dos.writeByte(cp);
@@ -325,6 +365,10 @@ public class ClassWriter {
         }
     }
 
+    /**
+     * insert bytearray into code
+     * @param cp codepart array
+     */
     void insertByteArray(byte[] cp) {
         try {
             dos.write(cp);
@@ -333,6 +377,10 @@ public class ClassWriter {
         }
     }
 
+    /**
+     * insert string into code
+     * @param s codepart
+     */
     void insertString(String s) {
         try {
             dos.write(s.getBytes());
@@ -344,6 +392,9 @@ public class ClassWriter {
 
     //-----------------------------------------------------------------------------------------------------------------
 
+    /**
+     * Debug - print code
+     */
     private void printByteCode() {
         int i = 0;
         for (byte b : code) {

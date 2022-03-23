@@ -10,6 +10,11 @@ import java.io.FileNotFoundException;
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * Parser
+ *
+ * @author Kr3b5
+ */
 public class Parser {
 
     /**
@@ -540,6 +545,10 @@ public class Parser {
     //-------------------------------------------------------------------------------------------------------
 
     // Terminals
+
+    /**
+     * check Ident
+     */
     private void checkIdent() {
         if (!bufferToken.getType().name().equals(TokenType.IDENT.name())) {
             printError(ParserErrors.ERROR_IDENT.message);
@@ -549,36 +558,54 @@ public class Parser {
         }
     }
 
+    /**
+     * check left curled bracket
+     */
     private void checkLCBracket() {
         if (!bufferToken.getType().name().equals(TokenType.LCBRACKET.name())) {
             printError(ParserErrors.ERROR_LCBRACKET.message);
         }else { readNextToken(); }
     }
 
+    /**
+     * check right curled bracket
+     */
     private void checkRCBracket() {
         if (!bufferToken.getType().name().equals(TokenType.RCBRACKET.name())) {
             printError(ParserErrors.ERROR_RCBRACKET.message);
         }else { readNextToken(); }
     }
 
+    /**
+     * check semicolon
+     */
     private void checkSemicolon() {
         if (!bufferToken.getType().name().equals(TokenType.SEMI.name())) {
             printError(ParserErrors.ERROR_SEMI.message);
         }else { readNextToken(); }
     }
 
+    /**
+     * check =
+     */
     private void checkAssign() {
         if (!bufferToken.getType().name().equals(TokenType.ASSIGN.name())) {
             printError(ParserErrors.ERROR_ASSIGN.message);
         }else { readNextToken(); }
     }
 
+    /**
+     * check int
+     */
     private void checkType() {
         if (!bufferToken.getType().name().equals(TokenType.INT.name())) {
             printError(ParserErrors.ERROR_TYPE.message);
         }else { readNextToken(); }
     }
 
+    /**
+     * check method type - int / void
+     */
     private void checkMethodType() {
         if (!(  bufferToken.getType().name().equals(TokenType.INT.name()) ||
                 bufferToken.getType().name().equals(TokenType.VOID.name()) ) ) {
@@ -591,24 +618,36 @@ public class Parser {
         }
     }
 
+    /**
+     * check left bracket
+     */
     private void checkLBracket() {
         if (!bufferToken.getType().name().equals(TokenType.LPAREN.name())) {
             printError(ParserErrors.ERROR_LPAREN.message);
         }else { readNextToken(); }
     }
 
+    /**
+     * check right bracket
+     */
     private void checkRBracket() {
         if (!bufferToken.getType().name().equals(TokenType.RPAREN.name())) {
             printError(ParserErrors.ERROR_RPAREN.message);
         }else { readNextToken(); }
     }
 
+    /**
+     * check else
+     */
     private void checkElse() {
         if (!bufferToken.getType().name().equals(TokenType.ELSE.name())) {
             printError(ParserErrors.ERROR_ELSE.message);
         }else { readNextToken(); }
     }
 
+    /**
+     * check left public
+     */
     private void checkPublic() {
         if (!bufferToken.getType().name().equals(TokenType.PUBLIC.name())) {
             printError(ParserErrors.ERROR_PUBLIC.message);
@@ -617,7 +656,9 @@ public class Parser {
 
     //-------------------------------------------------------------------------------------------------------
 
-    // Inputs
+    /**
+     * read next token
+     */
     private boolean readNextToken() {
         if (EOF) return false;
         if (scanner.hasNext()) {
@@ -632,8 +673,9 @@ public class Parser {
     }
 
     //-------------------------------------------------------------------------------------------------------
-
-    // Outputs
+    /**
+     * print errors
+     */
     private void printError(String error) {
         logger.error(getPrintFileInfo() + error);
         logger.error(getPrintFileInfo() + getPrintTokens() );
@@ -641,16 +683,25 @@ public class Parser {
         System.exit(1);
     }
 
+    /**
+     * print success
+     */
     private void printSuccess() {
         if(!FAIL) logger.info(getPrintFileInfo() + ParserErrors.NO_ERROR.message);
     }
 
+    /**
+     * print fileinfo
+     */
     private String getPrintFileInfo(){
         return scanner.getToken().getPosition().getFilename() + "("
                 + scanner.getToken().getPosition().getLine() + ","
                 + scanner.getToken().getPosition().getColumn() + "): ";
     }
 
+    /**
+     * print token
+     */
     private String getPrintTokens(){
         return    "Actual token: "
                 + actualToken.getType().name() + " ["
@@ -661,14 +712,19 @@ public class Parser {
     }
 
     //-------------------------------------------------------------------------------------------------------
-
     // SymbolTable Helper
 
+    /**
+     * insert object in symboltable
+     */
     private void SymbolTableInsert(STObject obj){
         symbolTable.insert(obj);
         resetValues();
     }
 
+    /**
+     * reset values for symboltable objects
+     */
     private void resetValues(){
         ST_VALUE = 0;
         ST_ID = null;
@@ -677,12 +733,18 @@ public class Parser {
     //-------------------------------------------------------------------------------------------------------
     // AST Helper
 
+    /**
+     * create container for AST
+     */
     private void createContainer(){
         nodeContainerFinal = new ASTNodeContainer(astID++, "finals");
         nodeContainerVars = new ASTNodeContainer(astID++, "vars");
         nodeContainerMethods = new ASTNodeContainer(astID++, "methods");
     }
 
+    /**
+     * merge container into AST
+     */
     private void mergeContainers(){
         nodeContainerFinal.setNodes(finalNodes);
         nodeContainerVars.setNodes(varNodes);

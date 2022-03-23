@@ -1,5 +1,10 @@
 package AbstractSyntaxTree;
 
+/**
+ * Enum - class AST node
+ *
+ * @author Kr3b5
+ */
 public enum ASTClass {
 
     VAR ,

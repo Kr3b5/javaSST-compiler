@@ -1,5 +1,12 @@
 package ClassData;
 
+/**
+ * Constantpool types
+ *
+ * https://docs.oracle.com/javase/specs/jvms/se15/html/jvms-4.html#jvms-4.4-140
+ *
+ * @author Kr3b5
+ */
 public enum CPTypes {
 
     UTF8                ((short) 1),

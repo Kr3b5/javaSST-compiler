@@ -6,17 +6,29 @@ import Parser.Parser;
 import java.io.FileNotFoundException;
 import java.util.Arrays;
 
+/**
+ * FSU Compiler
+ *
+ * @author Kr3b5
+ */
 public class FSUCompiler {
 
     private static boolean debugMode;
     private static boolean printDotMode;
 
-
+    /**
+     * main
+     * @param args arguments
+     */
     public static void main(String[] args) {
         ArgCheck(args);
         start(args[0]);
     }
 
+    /**
+     * start compiler
+     * @param filepath path java file
+     */
     private static void start(String filepath){
         try {
             Parser parser = new Parser(filepath);
@@ -39,7 +51,10 @@ public class FSUCompiler {
         }
     }
 
-
+    /**
+     * check arguments
+     * @param args arguments array
+     */
     private static void ArgCheck(String[] args){
         if(args.length < 1 || !args[0].contains(".java") || args.length > 3){
             printHelp();
@@ -50,6 +65,9 @@ public class FSUCompiler {
         printDotMode = Arrays.asList(args).contains("-dot");
     }
 
+    /**
+     * print help
+     */
     private static void printHelp(){
         System.out.println("USAGE: FSUCompile-1.0.jar <java-file> <options>");
         System.out.println("Valid Options:");

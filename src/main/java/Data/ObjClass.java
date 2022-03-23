@@ -1,5 +1,10 @@
 package Data;
 
+/**
+ * Enum - class symboltable entry
+ *
+ * @author Kr3b5
+ */
 public enum ObjClass {
 
     CLASS   (1),

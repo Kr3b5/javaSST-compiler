@@ -1,5 +1,12 @@
 package ClassData;
 
+/**
+ * Constant pool entry
+ *
+ * https://docs.oracle.com/javase/specs/jvms/se15/html/jvms-4.html#jvms-4.4.2
+ *
+ * @author Kr3b5
+ */
 public class CPConstant {
     byte type;
     short bytefield1;

@@ -1,7 +1,12 @@
 package ClassData;
 
-// https://docs.oracle.com/javase/specs/jvms/se15/html/jvms-6.html#jvms-6.5
-
+/**
+ * Instruction set - bytecode
+ *
+ * https://docs.oracle.com/javase/specs/jvms/se15/html/jvms-6.html#jvms-6.5
+ *
+ * @author Kr3b5
+ */
 public enum InsSet {
 
 

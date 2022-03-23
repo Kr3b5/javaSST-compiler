@@ -2,6 +2,11 @@ package ClassData;
 
 import java.util.List;
 
+/**
+ * abstract class for code entry
+ *
+ * @author Kr3b5
+ */
 public abstract class Entry {
 
     private short accessFlag;

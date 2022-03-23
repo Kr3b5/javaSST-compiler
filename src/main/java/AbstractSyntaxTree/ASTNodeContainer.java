@@ -2,6 +2,11 @@ package AbstractSyntaxTree;
 
 import java.util.List;
 
+/**
+ * Container for AST nodes
+ *
+ * @author Kr3b5
+ */
 public class ASTNodeContainer {
 
     private int ID;

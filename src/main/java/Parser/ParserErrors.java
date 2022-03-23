@@ -1,5 +1,10 @@
 package Parser;
 
+/**
+ * Enum for parser error messages
+ *
+ * @author Kr3b5
+ */
 public enum ParserErrors {
 
     ERROR_CLASS                 ("No class defined"),
@@ -23,9 +28,9 @@ public enum ParserErrors {
     NO_ERROR                    ("No Error found!");
 
 
-
-
-
+    /**
+     * error message
+     */
     public final String message;
 
     ParserErrors(String message) {

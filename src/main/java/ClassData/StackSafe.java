@@ -1,5 +1,10 @@
 package ClassData;
 
+/**
+ * safe for stored variables - bytecodegen
+ *
+ * @author Kr3b5
+ */
 public class StackSafe {
 
     int index;

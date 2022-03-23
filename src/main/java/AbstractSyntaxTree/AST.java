@@ -2,6 +2,11 @@ package AbstractSyntaxTree;
 
 import Data.STObject;
 
+/**
+ * Abstract syntax tree
+ *
+ * @author Kr3b5
+ */
 public class AST {
 
     private int ID;

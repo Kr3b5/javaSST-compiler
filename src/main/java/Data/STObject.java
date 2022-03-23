@@ -1,5 +1,10 @@
 package Data;
 
+/**
+ * Object of symboltable
+ *
+ * @author Kr3b5
+ */
 public class STObject {
 
     private final String name;

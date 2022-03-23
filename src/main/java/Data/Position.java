@@ -1,5 +1,10 @@
 package Data;
 
+/**
+ * File position object
+ *
+ * @author Kr3b5
+ */
 public class Position {
 
     private String filename;

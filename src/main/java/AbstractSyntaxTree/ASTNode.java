@@ -3,6 +3,11 @@ package AbstractSyntaxTree;
 import Data.STObject;
 import Data.TokenType;
 
+/**
+ * AST node
+ *
+ * @author Kr3b5
+ */
 public class ASTNode {
 
     private int id;

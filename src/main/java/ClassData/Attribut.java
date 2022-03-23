@@ -2,6 +2,13 @@ package ClassData;
 
 import java.util.List;
 
+/**
+ * Attribute
+ *
+ * https://docs.oracle.com/javase/specs/jvms/se15/html/jvms-4.html#jvms-4.7
+ *
+ * @author Kr3b5
+ */
 public class Attribut {
 
     private short nameIndex;

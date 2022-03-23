@@ -1,5 +1,10 @@
 package Data;
 
+/**
+ * Parser Token
+ *
+ * @author Kr3b5
+ */
 public class Token {
 
     private TokenType type;

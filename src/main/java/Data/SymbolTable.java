@@ -2,6 +2,11 @@ package Data;
 
 import java.util.LinkedList;
 
+/**
+ * Symboltable
+ *
+ * @author Kr3b5
+ */
 public class SymbolTable {
 
     LinkedList<STObject> objects;
