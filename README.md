@@ -29,7 +29,7 @@ This generates two .jar files in `./target`:
 ## Usage
 
 ```
-java -jar FSUCompile-1.0.jar <java-file> <options>
+java -jar FSUCompiler-1.0.jar <java-file> <options>
 
 Valid options:
     -dot : Print Dot File
