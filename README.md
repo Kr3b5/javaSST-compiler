@@ -2,7 +2,7 @@
   <p align="center">
     A JavaSST compiler written in Java as a study project at FSU Jena.
     <br />
-    <a href="https://github.com/Kr3b5/FSU-JavaSST-Compiler/issues">Report Bug</a>
+    <a href="https://github.com/Kr3b5/javaSST-compiler/issues">Report Bug</a>
   </p>
 
 
